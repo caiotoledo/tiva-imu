@@ -18,6 +18,12 @@
 #include <timers.h>
 #include <semphr.h>
 
+/* FreeRTOS Macros Tasks */
+#define TASK_LED_PRIORITY       (tskIDLE_PRIORITY)
+#define TASK_LED_STACKSIZE      (configMINIMAL_STACK_SIZE)
+#define TASK_I2C_PRIORITY       (TASK_LED_PRIORITY+1)
+#define TASK_I2C_STACKSIZE      (configMINIMAL_STACK_SIZE)
+
 #define LED_RED GPIO_PIN_1
 #define LED_BLUE GPIO_PIN_2
 #define LED_GREEN GPIO_PIN_3
@@ -69,13 +75,13 @@ int main()
     ROM_SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOF);
     ROM_GPIOPinTypeGPIOOutput(GPIO_PORTF_BASE, LED_RED | LED_BLUE | LED_GREEN);
 
-    if (xTaskCreate(vLedTask, "LED Task", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY, NULL) != pdPASS)
+    if (xTaskCreate(vLedTask, "LED Task", TASK_LED_STACKSIZE, NULL, TASK_LED_PRIORITY, NULL) != pdPASS)
     {
         ROM_GPIOPinWrite(GPIO_PORTF_BASE, LED_RED | LED_GREEN | LED_BLUE, LED_RED | LED_GREEN | LED_BLUE);
         while(1);
     }
 
-    if (xTaskCreate(vI2CTask, "I2C Task", configMINIMAL_STACK_SIZE, NULL, 1+tskIDLE_PRIORITY, NULL) != pdPASS)
+    if (xTaskCreate(vI2CTask, "I2C Task", TASK_I2C_STACKSIZE, NULL, TASK_I2C_PRIORITY, NULL) != pdPASS)
     {
         ROM_GPIOPinWrite(GPIO_PORTF_BASE, LED_RED | LED_GREEN | LED_BLUE, LED_RED | LED_GREEN | LED_BLUE);
         while(1);
