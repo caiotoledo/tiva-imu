@@ -29,6 +29,7 @@
 #define LED_RED GPIO_PIN_1
 #define LED_BLUE GPIO_PIN_2
 #define LED_GREEN GPIO_PIN_3
+#define UNUSED(x)               ((void)x)
 
 void vApplicationStackOverflowHook(TaskHandle_t xTask, signed char *pcTaskName)
 {
@@ -77,6 +78,7 @@ void vI2CTask (void *pvParam)
         I2CMasterControl(I2C1_BASE, I2C_MASTER_CMD_SINGLE_RECEIVE);
         while(I2CMasterBusy(I2C1_BASE));
         uint32_t val = I2CMasterDataGet(I2C1_BASE);
+        UNUSED(val);
         vTaskDelay(1000 / portTICK_RATE_MS);
     }
 }
