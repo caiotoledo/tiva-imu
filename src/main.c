@@ -67,6 +67,14 @@ void vI2CTask (void *pvParam)
 
     for(;;)
     {
+        ROM_I2CMasterSlaveAddrSet(I2C1_BASE, 0x68, false);
+        ROM_I2CMasterDataPut(I2C1_BASE, 0x75);
+        ROM_I2CMasterControl(I2C1_BASE, I2C_MASTER_CMD_BURST_SEND_START);
+        while(ROM_I2CMasterBusy(I2C1_BASE));
+        ROM_I2CMasterSlaveAddrSet(I2C1_BASE, 0x68, true);
+        ROM_I2CMasterControl(I2C1_BASE, I2C_MASTER_CMD_SINGLE_RECEIVE);
+        while(ROM_I2CMasterBusy(I2C1_BASE));
+        uint32_t val = ROM_I2CMasterDataGet(I2C1_BASE);
         vTaskDelay(1000 / portTICK_RATE_MS);
     }
 }
