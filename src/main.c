@@ -14,6 +14,8 @@
 #include "driverlib/pin_map.h"
 #include "driverlib/i2c.h"
 
+#include <LED_RGB.h>
+
 #include <FreeRTOS.h>
 #include <task.h>
 #include <queue.h>
@@ -26,9 +28,6 @@
 #define TASK_I2C_PRIORITY       (TASK_LED_PRIORITY+1)
 #define TASK_I2C_STACKSIZE      (configMINIMAL_STACK_SIZE)
 
-#define LED_RED GPIO_PIN_1
-#define LED_BLUE GPIO_PIN_2
-#define LED_GREEN GPIO_PIN_3
 #define UNUSED(x)               ((void)x)
 
 void vApplicationStackOverflowHook(TaskHandle_t xTask, signed char *pcTaskName)
@@ -50,9 +49,9 @@ void vLedTask(void *pvParameters)
 {
     for (;;)
     {
-        GPIOPinWrite(GPIO_PORTF_BASE, LED_RED | LED_GREEN | LED_BLUE, LED_RED);
+        LED_Set(RED_LED, true);
         vTaskDelay(500 / portTICK_RATE_MS);
-        GPIOPinWrite(GPIO_PORTF_BASE, LED_RED | LED_GREEN | LED_BLUE, 0);
+        LED_Set(RED_LED, false);
         vTaskDelay(500 / portTICK_RATE_MS);
     }
 }
@@ -86,18 +85,17 @@ void vI2CTask (void *pvParam)
 int main()
 {
     SysCtlClockSet(SYSCTL_SYSDIV_4 | SYSCTL_USE_PLL | SYSCTL_XTAL_16MHZ | SYSCTL_OSC_MAIN);
-    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOF);
-    GPIOPinTypeGPIOOutput(GPIO_PORTF_BASE, LED_RED | LED_BLUE | LED_GREEN);
+    LED_Enable();
 
     if (xTaskCreate(vLedTask, "LED Task", TASK_LED_STACKSIZE, NULL, TASK_LED_PRIORITY, NULL) != pdPASS)
     {
-        GPIOPinWrite(GPIO_PORTF_BASE, LED_RED | LED_GREEN | LED_BLUE, LED_RED | LED_GREEN | LED_BLUE);
+        LED_Set(RED_LED, true);
         while(1);
     }
 
     if (xTaskCreate(vI2CTask, "I2C Task", TASK_I2C_STACKSIZE, NULL, TASK_I2C_PRIORITY, NULL) != pdPASS)
     {
-        GPIOPinWrite(GPIO_PORTF_BASE, LED_RED | LED_GREEN | LED_BLUE, LED_RED | LED_GREEN | LED_BLUE);
+        LED_Set(RED_LED, true);
         while(1);
     }
 

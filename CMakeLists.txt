@@ -25,7 +25,11 @@ target_link_libraries(${PROJECT_NAME}
 
 # Add FreeRTOS library
 add_subdirectory(thirdparty/freertos ./build_freertos)
-target_link_libraries(${PROJECT_NAME} freertos)
+# Add RGB library
+add_subdirectory(thirdparty/rgb ./build_rgb)
+
+# Link all libraries
+target_link_libraries(${PROJECT_NAME} freertos rgb)
 
 # define objcopy macro
 macro(OBJCOPY_FILE EXE_NAME)
