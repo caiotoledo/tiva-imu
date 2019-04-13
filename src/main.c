@@ -10,7 +10,7 @@
 #include "driverlib/rom.h"
 #include "driverlib/sysctl.h"
 #include "driverlib/pin_map.h"
-#include "driverlib/can.h"
+#include "driverlib/i2c.h"
 
 #include <FreeRTOS.h>
 #include <task.h>
@@ -48,6 +48,21 @@ void vLedTask(void *pvParameters)
     }
 }
 
+void vI2CTask (void *pvParam)
+{
+    ROM_SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOA);
+    ROM_SysCtlPeripheralEnable(SYSCTL_PERIPH_I2C1);
+    while(!ROM_SysCtlPeripheralReady(SYSCTL_PERIPH_I2C1));
+    ROM_GPIOPinTypeI2CSCL(GPIO_PORTA_BASE, GPIO_PIN_6);
+    ROM_GPIOPinTypeI2C(GPIO_PORTA_BASE, GPIO_PIN_7);
+    ROM_I2CMasterInitExpClk(I2C1_BASE, ROM_SysCtlClockGet(), true);
+
+    for(;;)
+    {
+        vTaskDelay(1000 / portTICK_RATE_MS);
+    }
+}
+
 int main()
 {
     ROM_SysCtlClockSet(SYSCTL_SYSDIV_4 | SYSCTL_USE_PLL | SYSCTL_XTAL_16MHZ | SYSCTL_OSC_MAIN);
@@ -55,6 +70,12 @@ int main()
     ROM_GPIOPinTypeGPIOOutput(GPIO_PORTF_BASE, LED_RED | LED_BLUE | LED_GREEN);
 
     if (xTaskCreate(vLedTask, "LED Task", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY, NULL) != pdPASS)
+    {
+        ROM_GPIOPinWrite(GPIO_PORTF_BASE, LED_RED | LED_GREEN | LED_BLUE, LED_RED | LED_GREEN | LED_BLUE);
+        while(1);
+    }
+
+    if (xTaskCreate(vI2CTask, "I2C Task", configMINIMAL_STACK_SIZE, NULL, 1+tskIDLE_PRIORITY, NULL) != pdPASS)
     {
         ROM_GPIOPinWrite(GPIO_PORTF_BASE, LED_RED | LED_GREEN | LED_BLUE, LED_RED | LED_GREEN | LED_BLUE);
         while(1);
