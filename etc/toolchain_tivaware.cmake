@@ -32,9 +32,7 @@ set(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS "")
 set(CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS "")
 set(CMAKE_EXE_LINKER_FLAGS "-T${PROJECT_SOURCE_DIR}/etc/${LD_SCRIPT} -specs=${PROJECT_SOURCE_DIR}/etc/tiva.specs")
 
-# add processor specific definitions
-add_definitions(-DPART_TM4C123GH6PM)
-add_definitions(-DTARGET_IS_TM4C123_RB1)
+# add GCC specific definitions
 add_definitions(-Dgcc)
 
 set(TIVAWARE_PATH "/home/caio/Embedded/tivaware")
