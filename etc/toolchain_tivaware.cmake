@@ -20,7 +20,7 @@ set(CMAKE_CXX_COMPILER_WORKS 1)
 
 # set compiler flags
 set(CPU "-mcpu=cortex-m4")
-set(FPU "-mfpu=fpv4-sp-d16 -mfloat-abi=softfp")
+set(FPU "-mfpu=fpv4-sp-d16 -mfloat-abi=hard")
 set(CMAKE_ASM_FLAGS "-mthumb ${CPU} ${FPU} -MD")
 set(CMAKE_C_FLAGS "-mthumb ${CPU} ${FPU} -std=gnu99 -Os -ffunction-sections -fdata-sections -fsingle-precision-constant -MD -Wall -pedantic")
 set(CMAKE_CXX_FLAGS "-mthumb ${CPU} ${FPU} -Os -ffunction-sections -fdata-sections -fsingle-precision-constant -MD -Wall -pedantic -std=c++11 -fno-exceptions -fno-rtti")
