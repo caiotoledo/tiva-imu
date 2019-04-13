@@ -59,6 +59,8 @@ void vI2CTask (void *pvParam)
     ROM_SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOA);
     ROM_SysCtlPeripheralEnable(SYSCTL_PERIPH_I2C1);
     while(!ROM_SysCtlPeripheralReady(SYSCTL_PERIPH_I2C1));
+    ROM_GPIOPinConfigure(GPIO_PA6_I2C1SCL);
+    ROM_GPIOPinConfigure(GPIO_PA7_I2C1SDA);
     ROM_GPIOPinTypeI2CSCL(GPIO_PORTA_BASE, GPIO_PIN_6);
     ROM_GPIOPinTypeI2C(GPIO_PORTA_BASE, GPIO_PIN_7);
     ROM_I2CMasterInitExpClk(I2C1_BASE, ROM_SysCtlClockGet(), true);
