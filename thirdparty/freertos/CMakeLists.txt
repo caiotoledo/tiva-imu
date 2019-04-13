@@ -4,8 +4,6 @@ project(${PROJECT_NAME})
 
 include(../../etc/toolchain_tivaware.cmake)
 
-set(CMAKE_EXE_LINKER_FLAGS "")
-
 set(src_dir "${PROJECT_SOURCE_DIR}/FreeRTOS/Source/")
 file(GLOB src_files "${src_dir}/*.c")
 file(GLOB src_port "${src_dir}/portable/GCC/ARM_CM4F/*.c")
