@@ -72,10 +72,16 @@ void vI2CTask (void *pvParam)
         I2CMasterSlaveAddrSet(I2C1_BASE, 0x68, false);
         I2CMasterDataPut(I2C1_BASE, 0x75);
         I2CMasterControl(I2C1_BASE, I2C_MASTER_CMD_BURST_SEND_START);
-        while(I2CMasterBusy(I2C1_BASE));
+        while(I2CMasterBusy(I2C1_BASE))
+        {
+            vTaskDelay(1/portTICK_RATE_MS);
+        }
         I2CMasterSlaveAddrSet(I2C1_BASE, 0x68, true);
         I2CMasterControl(I2C1_BASE, I2C_MASTER_CMD_SINGLE_RECEIVE);
-        while(I2CMasterBusy(I2C1_BASE));
+        while(I2CMasterBusy(I2C1_BASE))
+        {
+            vTaskDelay(1/portTICK_RATE_MS);
+        }
         uint32_t val = I2CMasterDataGet(I2C1_BASE);
         UNUSED(val);
         vTaskDelay(1000 / portTICK_RATE_MS);
