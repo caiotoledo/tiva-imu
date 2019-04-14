@@ -15,6 +15,7 @@
 #include "driverlib/i2c.h"
 
 #include <LED_RGB.h>
+#include <hal_i2c.h>
 
 #include <FreeRTOS.h>
 #include <task.h>
@@ -58,31 +59,10 @@ void vLedTask(void *pvParameters)
 
 void vI2CTask (void *pvParam)
 {
-    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOA);
-    SysCtlPeripheralEnable(SYSCTL_PERIPH_I2C1);
-    while(!SysCtlPeripheralReady(SYSCTL_PERIPH_I2C1));
-    GPIOPinConfigure(GPIO_PA6_I2C1SCL);
-    GPIOPinConfigure(GPIO_PA7_I2C1SDA);
-    GPIOPinTypeI2CSCL(GPIO_PORTA_BASE, GPIO_PIN_6);
-    GPIOPinTypeI2C(GPIO_PORTA_BASE, GPIO_PIN_7);
-    I2CMasterInitExpClk(I2C1_BASE, SysCtlClockGet(), true);
-
+    I2C_Enable(I2C1);
     for(;;)
     {
-        I2CMasterSlaveAddrSet(I2C1_BASE, 0x68, false);
-        I2CMasterDataPut(I2C1_BASE, 0x75);
-        I2CMasterControl(I2C1_BASE, I2C_MASTER_CMD_BURST_SEND_START);
-        while(I2CMasterBusy(I2C1_BASE))
-        {
-            vTaskDelay(1/portTICK_RATE_MS);
-        }
-        I2CMasterSlaveAddrSet(I2C1_BASE, 0x68, true);
-        I2CMasterControl(I2C1_BASE, I2C_MASTER_CMD_SINGLE_RECEIVE);
-        while(I2CMasterBusy(I2C1_BASE))
-        {
-            vTaskDelay(1/portTICK_RATE_MS);
-        }
-        uint32_t val = I2CMasterDataGet(I2C1_BASE);
+        uint32_t val = I2C_Read_Reg(I2C1, 0x68, 0x75);
         UNUSED(val);
         vTaskDelay(1000 / portTICK_RATE_MS);
     }

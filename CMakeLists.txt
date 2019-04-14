@@ -27,9 +27,11 @@ target_link_libraries(${PROJECT_NAME}
 add_subdirectory(thirdparty/freertos ./build_freertos)
 # Add RGB library
 add_subdirectory(thirdparty/rgb ./build_rgb)
+# Add I2C library
+add_subdirectory(thirdparty/i2c ./build_i2c)
 
 # Link all libraries
-target_link_libraries(${PROJECT_NAME} freertos rgb)
+target_link_libraries(${PROJECT_NAME} freertos rgb i2c)
 
 # define objcopy macro
 macro(OBJCOPY_FILE EXE_NAME)
