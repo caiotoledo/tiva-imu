@@ -10,6 +10,10 @@
 
 #include <stdint.h>
 
+#define WIDTH_BASE			(1024)
+#define RGB_MAX_VALUE		(WIDTH_BASE-1)
+#define RGB_MIN_VALUE		(0)
+
 typedef enum {
 	RED_LED,
 	BLUE_LED,

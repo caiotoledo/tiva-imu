@@ -20,9 +20,6 @@
 #include "LED_RGB.h"
 
 #define PWM_PERIOD		(64000)
-#define WIDTH_BASE		(1024)
-#define MAX_VALUE		(WIDTH_BASE-1)
-#define MIN_VALUE		(0)
 
 typedef struct
 {
@@ -92,7 +89,7 @@ void LED_Set(LED_RGB led, bool state)
 {
 	uint32_t duty;
 
-	duty = state ? MAX_VALUE : MIN_VALUE;
+	duty = state ? RGB_MAX_VALUE : RGB_MIN_VALUE;
 	setLedDuty(led, duty);
 }
 
@@ -164,7 +161,7 @@ static void setLedDuty (LED_RGB led, uint32_t duty)
 	}
 
 	/* Limit Duty Cycle to MAX_VALUE */
-	duty = duty > MAX_VALUE ? MAX_VALUE : duty;
+	duty = duty > RGB_MAX_VALUE ? RGB_MAX_VALUE : duty;
 
 	/* Calculate base duty cycle */
 	base = PWMGenPeriodGet(PWM1_BASE, pwm_conf->PWMGen)*duty/WIDTH_BASE;
