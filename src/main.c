@@ -23,6 +23,8 @@
 #include <timers.h>
 #include <semphr.h>
 
+#include "led_task.h"
+
 /* FreeRTOS Macros Tasks */
 #define TASK_LED_PRIORITY       (tskIDLE_PRIORITY)
 #define TASK_LED_STACKSIZE      (configMINIMAL_STACK_SIZE)
@@ -43,17 +45,6 @@ void vApplicationStackOverflowHook(TaskHandle_t xTask, signed char *pcTaskName)
     corrupt. */
     for (;;)
     {
-    }
-}
-
-void vLedTask(void *pvParameters)
-{
-    for (;;)
-    {
-        LED_Set(RED_LED, true);
-        vTaskDelay(500 / portTICK_RATE_MS);
-        LED_Set(RED_LED, false);
-        vTaskDelay(500 / portTICK_RATE_MS);
     }
 }
 
