@@ -3,20 +3,53 @@
 #include <stdint.h>
 
 #include <LED_RGB.h>
+#include <button.h>
 
 #include <FreeRTOS.h>
 #include <timers.h>
 
-#define RGB_RAINBOW_STEP    50
+#define RGB_RAINBOW_STEP_MAX            500
+#define RGB_RAINBOW_STEP_INITIAL        50
+#define RGB_RAINBOW_STEP_INCREMENT      25
 
 static void vStateMachineRainbowRGB(void);
+static uint32_t GetMillis(void);
+
+static uint32_t RGBRainbowStep = RGB_RAINBOW_STEP_INITIAL;
 
 void vLedTask(void *pvParameters)
 {
+    Button_Enable(GetMillis);
+
     for (;;)
     {
         vStateMachineRainbowRGB();
+
+        bool sw1 = Button_Get_State(ButtonSW1);
+        if (sw1)
+        {
+            RGBRainbowStep += RGB_RAINBOW_STEP_INCREMENT;
+            if (RGBRainbowStep > RGB_RAINBOW_STEP_MAX)
+            {
+                RGBRainbowStep = RGB_RAINBOW_STEP_MAX;
+            }
+        }
+
+        bool sw2 = Button_Get_State(ButtonSW2);
+        if (sw2)
+        {
+            RGBRainbowStep -= RGB_RAINBOW_STEP_INCREMENT;
+            if (RGBRainbowStep > RGB_RAINBOW_STEP_MAX)
+            {
+                RGBRainbowStep = 0;
+            }
+        }
     }
+}
+
+static uint32_t GetMillis(void)
+{
+    return (xTaskGetTickCountFromISR()/portTICK_RATE_MS);
 }
 
 static bool ApplyRGBStep(uint16_t *color, bool add)
@@ -26,11 +59,11 @@ static bool ApplyRGBStep(uint16_t *color, bool add)
 
     if (add)
     {
-        c += RGB_RAINBOW_STEP;
+        c += RGBRainbowStep;
     }
     else
     {
-        c -= RGB_RAINBOW_STEP;
+        c -= RGBRainbowStep;
     }
 
     if (c >= RGB_MAX_VALUE)

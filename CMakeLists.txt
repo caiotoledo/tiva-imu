@@ -29,9 +29,11 @@ add_subdirectory(thirdparty/freertos ./build_freertos)
 add_subdirectory(thirdparty/rgb ./build_rgb)
 # Add I2C library
 add_subdirectory(thirdparty/i2c ./build_i2c)
+# Add Button library
+add_subdirectory(thirdparty/button ./build_button)
 
 # Link all libraries
-target_link_libraries(${PROJECT_NAME} freertos rgb i2c)
+target_link_libraries(${PROJECT_NAME} freertos rgb i2c button)
 
 # define objcopy macro
 macro(OBJCOPY_FILE EXE_NAME)
