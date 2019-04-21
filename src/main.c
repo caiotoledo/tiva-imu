@@ -14,6 +14,7 @@
 #include "driverlib/pin_map.h"
 #include "driverlib/i2c.h"
 
+#include <version.h>
 #include <LED_RGB.h>
 #include <hal_i2c.h>
 #include <hal_uart.h>
@@ -66,7 +67,10 @@ int main()
 
     /* Initialize UART */
     UART_Enable(UART0, 115200);
+
+    /* Start Program */
     UARTprintf("Start Program\n");
+    UARTprintf("Version: %u.%u.%u.%d\n", MAJOR_VERSION, MINOR_VERSION, RELEASE_VERSION, __INT_TIMESTAMP__);
 
     /* Initialize LEDs */
     LED_Enable();
