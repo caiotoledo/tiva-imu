@@ -8,6 +8,8 @@
 #include <FreeRTOS.h>
 #include <timers.h>
 
+#include <hal_uart.h>
+
 #define RGB_RAINBOW_STEP_MAX            500
 #define RGB_RAINBOW_STEP_MIN            0
 #define RGB_RAINBOW_STEP_INITIAL        50
@@ -34,6 +36,7 @@ void vLedTask(void *pvParameters)
             {
                 RGBRainbowStep = RGB_RAINBOW_STEP_MAX;
             }
+            UARTprintf("RGBRainbowStep [%u]\n", RGBRainbowStep);
         }
 
         bool sw2 = Button_Get_State(ButtonSW2);
@@ -44,6 +47,7 @@ void vLedTask(void *pvParameters)
             {
                 RGBRainbowStep = RGB_RAINBOW_STEP_MIN;
             }
+            UARTprintf("RGBRainbowStep [%u]\n", RGBRainbowStep);
         }
     }
 }

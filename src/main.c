@@ -16,6 +16,7 @@
 
 #include <LED_RGB.h>
 #include <hal_i2c.h>
+#include <hal_uart.h>
 
 #include <FreeRTOS.h>
 #include <task.h>
@@ -62,6 +63,12 @@ void vI2CTask (void *pvParam)
 int main()
 {
     SysCtlClockSet(SYSCTL_SYSDIV_4 | SYSCTL_USE_PLL | SYSCTL_XTAL_16MHZ | SYSCTL_OSC_MAIN);
+
+    /* Initialize UART */
+    UART_Enable(UART0, 115200);
+    UARTprintf("Start Program\n");
+
+    /* Initialize LEDs */
     LED_Enable();
 
     if (xTaskCreate(vLedTask, "LED Task", TASK_LED_STACKSIZE, NULL, TASK_LED_PRIORITY, NULL) != pdPASS)
