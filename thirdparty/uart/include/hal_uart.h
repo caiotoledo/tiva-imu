@@ -1,5 +1,5 @@
-#ifndef HAL_UART_UTILS_H_
-#define HAL_UART_UTILS_H_
+#ifndef HAL_UART_H_
+#define HAL_UART_H_
 
 #define UART_BUFFERED
 #include "utils/uartstdio.h"
@@ -10,4 +10,4 @@ typedef enum {
 
 void UART_Enable(eUART_BASE uart, uint32_t baudrate);
 
-#endif /* HAL_UART_UTILS_H_ */
+#endif /* HAL_UART_H_ */
