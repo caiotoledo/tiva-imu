@@ -34,7 +34,7 @@ typedef struct
     tI2C_Pin_Conf conf;
 } tI2C_Conf;
 
-static const tI2C_Pin_Conf *GetI2CConf(eI2C_BASE led);
+static const tI2C_Pin_Conf *GetI2CConf(eI2C_BASE i2c);
 
 /* Map for I2Cs configurations: */
 static const tI2C_Conf i2c_configurations[] =
@@ -55,13 +55,13 @@ static const tI2C_Conf i2c_configurations[] =
         },
 };
 
-static const tI2C_Pin_Conf *GetI2CConf(eI2C_BASE led)
+static const tI2C_Pin_Conf *GetI2CConf(eI2C_BASE i2c)
 {
     const tI2C_Pin_Conf *i2c_pin_conf = 0U;
     /* Search for I2C configuration */
     for (uint8_t i = 0; i < sizeof(i2c_configurations) / sizeof(tI2C_Conf); i++)
     {
-        if (i2c_configurations[i].i2c == led)
+        if (i2c_configurations[i].i2c == i2c)
         {
             i2c_pin_conf = &i2c_configurations[i].conf;
             break;
