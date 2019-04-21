@@ -1,6 +1,7 @@
 #ifndef HAL_UART_UTILS_H_
 #define HAL_UART_UTILS_H_
 
+#define UART_BUFFERED
 #include "utils/uartstdio.h"
 
 typedef enum {
