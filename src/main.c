@@ -18,6 +18,7 @@
 #include <LED_RGB.h>
 #include <hal_i2c.h>
 #include <hal_uart.h>
+#include <log.h>
 
 #include <FreeRTOS.h>
 #include <task.h>
@@ -56,7 +57,14 @@ void vI2CTask (void *pvParam)
     for(;;)
     {
         uint32_t val = I2C_Read_Reg(I2C1, 0x68, 0x75);
-        UNUSED(val);
+        if (val == 0x68)
+        {
+            INFO("MPU6050 found [0x%02X]\n", val);
+        }
+        else
+        {
+            ERROR("MPU6050 NOT found [0x%02X]\n", val);
+        }
         vTaskDelay(1000 / portTICK_RATE_MS);
     }
 }
@@ -69,8 +77,8 @@ int main()
     UART_Enable(UART0, 115200);
 
     /* Start Program */
-    UARTprintf("Start Program\n");
-    UARTprintf("Version: %u.%u.%u.%d\n", MAJOR_VERSION, MINOR_VERSION, RELEASE_VERSION, __INT_TIMESTAMP__);
+    INFO("Start Program\n");
+    INFO("Version: %u.%u.%u.%d\n", MAJOR_VERSION, MINOR_VERSION, RELEASE_VERSION, __INT_TIMESTAMP__);
 
     /* Initialize LEDs */
     LED_Enable();

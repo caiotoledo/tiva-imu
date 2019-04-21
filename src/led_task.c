@@ -2,6 +2,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include <log.h>
 #include <LED_RGB.h>
 #include <button.h>
 
@@ -36,7 +37,7 @@ void vLedTask(void *pvParameters)
             {
                 RGBRainbowStep = RGB_RAINBOW_STEP_MAX;
             }
-            UARTprintf("RGBRainbowStep [%u]\n", RGBRainbowStep);
+            INFO("RGBRainbowStep [%u]\n", RGBRainbowStep);
         }
 
         bool sw2 = Button_Get_State(ButtonSW2);
@@ -47,7 +48,7 @@ void vLedTask(void *pvParameters)
             {
                 RGBRainbowStep = RGB_RAINBOW_STEP_MIN;
             }
-            UARTprintf("RGBRainbowStep [%u]\n", RGBRainbowStep);
+            INFO("RGBRainbowStep [%u]\n", RGBRainbowStep);
         }
     }
 }
