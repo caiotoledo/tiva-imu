@@ -9,6 +9,7 @@
 #include <timers.h>
 
 #define RGB_RAINBOW_STEP_MAX            500
+#define RGB_RAINBOW_STEP_MIN            0
 #define RGB_RAINBOW_STEP_INITIAL        50
 #define RGB_RAINBOW_STEP_INCREMENT      25
 
@@ -41,7 +42,7 @@ void vLedTask(void *pvParameters)
             RGBRainbowStep -= RGB_RAINBOW_STEP_INCREMENT;
             if (RGBRainbowStep > RGB_RAINBOW_STEP_MAX)
             {
-                RGBRainbowStep = 0;
+                RGBRainbowStep = RGB_RAINBOW_STEP_MIN;
             }
         }
     }
