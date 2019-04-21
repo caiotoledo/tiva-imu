@@ -36,8 +36,8 @@
 
 void vApplicationStackOverflowHook(TaskHandle_t xTask, signed char *pcTaskName)
 {
-    (void)pcTaskName;
-    (void)xTask;
+    UNUSED(pcTaskName);
+    UNUSED(xTask);
 
     /* Run time stack overflow checking is performed if
     configconfigCHECK_FOR_STACK_OVERFLOW is defined to 1 or 2.  This hook
