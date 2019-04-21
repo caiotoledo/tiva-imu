@@ -63,7 +63,6 @@ void UART_Enable(eUART_BASE uart, uint32_t baudrate)
     {
         return;
     }
-    
 
     //
     // Enable the GPIO Peripheral used by the UART.
