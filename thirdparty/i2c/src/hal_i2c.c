@@ -16,6 +16,8 @@
 
 #include <hal_i2c.h>
 
+#define I2C_TIMEOUT_MS      200
+
 typedef struct
 {
     uint32_t I2CPeripheral;
@@ -104,18 +106,37 @@ void I2C_Enable(eI2C_BASE i2c, millis f)
 
 uint32_t I2C_Read_Reg(eI2C_BASE i2c, uint8_t slave_addr, uint8_t reg_addr)
 {
+    uint32_t val = 0x00;
+    uint32_t start = 0U;
+
     /* Set slave address */
     I2CMasterSlaveAddrSet(I2C1_BASE, slave_addr, false);
 
     /* Set register address */
     I2CMasterDataPut(I2C1_BASE, reg_addr);
     I2CMasterControl(I2C1_BASE, I2C_MASTER_CMD_BURST_SEND_START);
-    while (I2CMasterBusy(I2C1_BASE));
+
+    start = ms_func();
+    while (I2CMasterBusy(I2C1_BASE))
+    {
+        if ( (ms_func() - start) > I2C_TIMEOUT_MS )
+        {
+            return val;
+        }
+    }
 
     /* Get register value */
     I2CMasterSlaveAddrSet(I2C1_BASE, slave_addr, true);
     I2CMasterControl(I2C1_BASE, I2C_MASTER_CMD_SINGLE_RECEIVE);
-    while (I2CMasterBusy(I2C1_BASE));
+
+    start = ms_func();
+    while (I2CMasterBusy(I2C1_BASE))
+    {
+        if ( (ms_func() - start) > I2C_TIMEOUT_MS )
+        {
+            return val;
+        }
+    }
 
     /* Return register value */
     return I2CMasterDataGet(I2C1_BASE);
