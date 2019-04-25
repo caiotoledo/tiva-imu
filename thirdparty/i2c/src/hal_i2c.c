@@ -73,6 +73,34 @@ static const tI2C_Pin_Conf *GetI2CConf(eI2C_BASE i2c)
     return i2c_pin_conf;
 }
 
+static bool WaitI2CMasterBusy(eI2C_BASE i2c, uint32_t timeout)
+{
+    bool flag = false;
+
+    uint32_t start = ms_func();
+
+    const tI2C_Pin_Conf *i2c_pin_conf;
+    i2c_pin_conf = GetI2CConf(i2c);
+    /* Return if no valid configuration was found */
+    if (i2c_pin_conf == 0U)
+    {
+        goto end_wait;
+    }
+
+    while (I2CMasterBusy(i2c_pin_conf->I2CBase))
+    {
+        if ( (ms_func() - start) > I2C_TIMEOUT_MS )
+        {
+            goto end_wait;
+        }
+    }
+
+    /* Only reaches this point if sucessful */
+    flag = true;
+end_wait:
+    return flag;
+}
+
 void I2C_Enable(eI2C_BASE i2c, millis f)
 {
 
@@ -107,7 +135,6 @@ void I2C_Enable(eI2C_BASE i2c, millis f)
 uint32_t I2C_Read_Reg(eI2C_BASE i2c, uint8_t slave_addr, uint8_t reg_addr)
 {
     uint32_t val = 0x00;
-    uint32_t start = 0U;
 
     const tI2C_Pin_Conf *i2c_pin_conf;
     i2c_pin_conf = GetI2CConf(i2c);
@@ -124,26 +151,18 @@ uint32_t I2C_Read_Reg(eI2C_BASE i2c, uint8_t slave_addr, uint8_t reg_addr)
     I2CMasterDataPut(i2c_pin_conf->I2CBase, reg_addr);
     I2CMasterControl(i2c_pin_conf->I2CBase, I2C_MASTER_CMD_BURST_SEND_START);
 
-    start = ms_func();
-    while (I2CMasterBusy(i2c_pin_conf->I2CBase))
+    if (!WaitI2CMasterBusy(i2c, I2C_TIMEOUT_MS))
     {
-        if ( (ms_func() - start) > I2C_TIMEOUT_MS )
-        {
-            goto end_read;
-        }
+        goto end_read;
     }
 
     /* Get register value */
     I2CMasterSlaveAddrSet(i2c_pin_conf->I2CBase, slave_addr, true);
     I2CMasterControl(i2c_pin_conf->I2CBase, I2C_MASTER_CMD_SINGLE_RECEIVE);
 
-    start = ms_func();
-    while (I2CMasterBusy(i2c_pin_conf->I2CBase))
+    if (!WaitI2CMasterBusy(i2c, I2C_TIMEOUT_MS))
     {
-        if ( (ms_func() - start) > I2C_TIMEOUT_MS )
-        {
-            goto end_read;
-        }
+        goto end_read;
     }
 
     /* Return register value */
