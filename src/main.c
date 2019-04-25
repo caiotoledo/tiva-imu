@@ -28,6 +28,8 @@
 
 #include "led_task.h"
 
+#define PROGRAM_NAME            "tiva-imu"
+
 /* FreeRTOS Macros Tasks */
 #define TASK_LED_PRIORITY       (tskIDLE_PRIORITY)
 #define TASK_LED_STACKSIZE      (configMINIMAL_STACK_SIZE)
@@ -84,7 +86,7 @@ int main()
     UART_Enable(UART0, 115200);
 
     /* Start Program */
-    INFO("Start Program");
+    INFO("Start %s", PROGRAM_NAME);
     INFO("Version: %u.%u.%u.%d", MAJOR_VERSION, MINOR_VERSION, RELEASE_VERSION, __INT_TIMESTAMP__);
 
     /* Initialize LEDs */
