@@ -60,7 +60,7 @@ static millis ms_func;
 
 static const tI2C_Pin_Conf *GetI2CConf(eI2C_BASE i2c)
 {
-    const tI2C_Pin_Conf *i2c_pin_conf = 0U;
+    const tI2C_Pin_Conf *i2c_pin_conf = NULL;
     /* Search for I2C configuration */
     for (uint8_t i = 0; i < sizeof(i2c_configurations) / sizeof(tI2C_Conf); i++)
     {
@@ -82,7 +82,7 @@ static bool WaitI2CMasterBusy(eI2C_BASE i2c, uint32_t timeout)
     const tI2C_Pin_Conf *i2c_pin_conf;
     i2c_pin_conf = GetI2CConf(i2c);
     /* Return if no valid configuration was found */
-    if (i2c_pin_conf == 0U)
+    if (i2c_pin_conf == NULL)
     {
         goto end_wait;
     }
@@ -113,7 +113,7 @@ void I2C_Enable(eI2C_BASE i2c, millis f)
     const tI2C_Pin_Conf *i2c_pin_conf;
     i2c_pin_conf = GetI2CConf(i2c);
     /* Return if no valid configuration was found */
-    if (i2c_pin_conf == 0U)
+    if (i2c_pin_conf == NULL)
     {
         return;
     }
@@ -139,7 +139,7 @@ uint32_t I2C_Read_Reg(eI2C_BASE i2c, uint8_t slave_addr, uint8_t reg_addr)
     const tI2C_Pin_Conf *i2c_pin_conf;
     i2c_pin_conf = GetI2CConf(i2c);
     /* Return if no valid configuration was found */
-    if (i2c_pin_conf == 0U)
+    if (i2c_pin_conf == NULL)
     {
         goto end_read;
     }

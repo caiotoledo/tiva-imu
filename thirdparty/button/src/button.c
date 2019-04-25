@@ -149,7 +149,7 @@ static void Button_ISP_Handler()
 
 static const tButtonData *GetButtonData(eButtonSW button)
 {
-    const tButtonData *button_data = 0U;
+    const tButtonData *button_data = NULL;
     /* Search for Button data */
     for (uint8_t i = 0; i < sizeof(MapButton) / sizeof(tButtonConf); i++)
     {
