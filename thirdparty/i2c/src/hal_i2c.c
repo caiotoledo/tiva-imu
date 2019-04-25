@@ -114,7 +114,7 @@ uint32_t I2C_Read_Reg(eI2C_BASE i2c, uint8_t slave_addr, uint8_t reg_addr)
     /* Return if no valid configuration was found */
     if (i2c_pin_conf == 0U)
     {
-        return val;
+        goto end_read;
     }
 
     /* Set slave address */
@@ -129,7 +129,7 @@ uint32_t I2C_Read_Reg(eI2C_BASE i2c, uint8_t slave_addr, uint8_t reg_addr)
     {
         if ( (ms_func() - start) > I2C_TIMEOUT_MS )
         {
-            return val;
+            goto end_read;
         }
     }
 
@@ -142,10 +142,13 @@ uint32_t I2C_Read_Reg(eI2C_BASE i2c, uint8_t slave_addr, uint8_t reg_addr)
     {
         if ( (ms_func() - start) > I2C_TIMEOUT_MS )
         {
-            return val;
+            goto end_read;
         }
     }
 
     /* Return register value */
-    return I2CMasterDataGet(i2c_pin_conf->I2CBase);
+    val = I2CMasterDataGet(i2c_pin_conf->I2CBase);
+
+end_read:
+    return val;
 }
