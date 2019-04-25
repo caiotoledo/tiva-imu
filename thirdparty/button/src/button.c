@@ -164,5 +164,13 @@ static const tButtonData *GetButtonData(eButtonSW button)
 
 static bool GetButtonState(eButtonSW button)
 {
-    return GetButtonData(button)->state;
+    bool state = false;
+
+    tButtonData *button_data = GetButtonData(button);
+    if (button_data != NULL)
+    {
+        state = button_data->state;
+    }
+
+    return state;
 }
