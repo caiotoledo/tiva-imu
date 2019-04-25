@@ -61,11 +61,11 @@ void vI2CTask (void *pvParam)
         uint32_t val = I2C_Read_Reg(I2C1, 0x68, 0x75);
         if (val == 0x68)
         {
-            INFO("MPU6050 found [0x%02X]\n", val);
+            INFO("MPU6050 found [0x%02X]", val);
         }
         else
         {
-            ERROR("MPU6050 NOT found [0x%02X]\n", val);
+            ERROR("MPU6050 NOT found [0x%02X]", val);
         }
         vTaskDelay(1000 / portTICK_RATE_MS);
     }
@@ -84,8 +84,8 @@ int main()
     UART_Enable(UART0, 115200);
 
     /* Start Program */
-    INFO("Start Program\n");
-    INFO("Version: %u.%u.%u.%d\n", MAJOR_VERSION, MINOR_VERSION, RELEASE_VERSION, __INT_TIMESTAMP__);
+    INFO("Start Program");
+    INFO("Version: %u.%u.%u.%d", MAJOR_VERSION, MINOR_VERSION, RELEASE_VERSION, __INT_TIMESTAMP__);
 
     /* Initialize LEDs */
     LED_Enable();

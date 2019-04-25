@@ -12,20 +12,20 @@
 
 #ifdef LOG_DEBUG_INFO
     #define LOG_DEBUG_WARN
-    #define INFO(...)      UARTprintf(__VA_ARGS__)
+    #define INFO(...)      UARTprintf(__VA_ARGS__); UARTprintf("\n");
 #else
     #define INFO(...)
 #endif
 
 #ifdef LOG_DEBUG_WARN
     #define LOG_DEBUG_ERROR
-    #define WARN(...)      UARTprintf(__VA_ARGS__)
+    #define WARN(...)      UARTprintf(__VA_ARGS__); UARTprintf("\n");
 #else
     #define WARN(...)
 #endif
 
 #ifdef LOG_DEBUG_ERROR
-    #define ERROR(...)      UARTprintf(__VA_ARGS__)
+    #define ERROR(...)      UARTprintf(__VA_ARGS__); UARTprintf("\n");
 #else
     #define ERROR(...)
 #endif

@@ -38,7 +38,7 @@ void vLedTask(void *pvParameters)
             {
                 RGBRainbowStep = RGB_RAINBOW_STEP_MAX;
             }
-            INFO("RGBRainbowStep [%u]\n", RGBRainbowStep);
+            INFO("RGBRainbowStep [%u]", RGBRainbowStep);
         }
 
         bool sw2 = Button_Get_State(ButtonSW2);
@@ -49,7 +49,7 @@ void vLedTask(void *pvParameters)
             {
                 RGBRainbowStep = RGB_RAINBOW_STEP_MIN;
             }
-            INFO("RGBRainbowStep [%u]\n", RGBRainbowStep);
+            INFO("RGBRainbowStep [%u]", RGBRainbowStep);
         }
     }
 }
