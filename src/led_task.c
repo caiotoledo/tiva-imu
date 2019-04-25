@@ -16,8 +16,9 @@
 #define RGB_RAINBOW_STEP_INITIAL        50
 #define RGB_RAINBOW_STEP_INCREMENT      25
 
+extern uint32_t GetMillis(void);
+
 static void vStateMachineRainbowRGB(void);
-static uint32_t GetMillis(void);
 
 static uint32_t RGBRainbowStep = RGB_RAINBOW_STEP_INITIAL;
 
@@ -51,11 +52,6 @@ void vLedTask(void *pvParameters)
             INFO("RGBRainbowStep [%u]\n", RGBRainbowStep);
         }
     }
-}
-
-static uint32_t GetMillis(void)
-{
-    return (xTaskGetTickCountFromISR()/portTICK_RATE_MS);
 }
 
 static bool ApplyRGBStep(uint16_t *color, bool add)

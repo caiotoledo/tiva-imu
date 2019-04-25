@@ -36,6 +36,8 @@
 
 #define UNUSED(x)               ((void)x)
 
+uint32_t GetMillis(void);
+
 void vApplicationStackOverflowHook(TaskHandle_t xTask, signed char *pcTaskName)
 {
     UNUSED(pcTaskName);
@@ -67,6 +69,11 @@ void vI2CTask (void *pvParam)
         }
         vTaskDelay(1000 / portTICK_RATE_MS);
     }
+}
+
+uint32_t GetMillis(void)
+{
+    return (xTaskGetTickCountFromISR()/portTICK_RATE_MS);
 }
 
 int main()
