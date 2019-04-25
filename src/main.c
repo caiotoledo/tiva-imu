@@ -55,7 +55,7 @@ void vApplicationStackOverflowHook(TaskHandle_t xTask, signed char *pcTaskName)
 
 void vI2CTask (void *pvParam)
 {
-    I2C_Enable(I2C1);
+    I2C_Enable(I2C1, GetMillis);
     for(;;)
     {
         uint32_t val = I2C_Read_Reg(I2C1, 0x68, 0x75);

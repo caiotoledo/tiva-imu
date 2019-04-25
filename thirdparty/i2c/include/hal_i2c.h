@@ -8,7 +8,9 @@ typedef enum {
     I2C3
 } eI2C_BASE;
 
-void I2C_Enable(eI2C_BASE i2c);
+typedef uint32_t (*millis)();
+
+void I2C_Enable(eI2C_BASE i2c, millis f);
 uint32_t I2C_Read_Reg(eI2C_BASE i2c, uint8_t slave_addr, uint8_t reg_addr);
 
 #endif /* HAL_I2C_H_ */

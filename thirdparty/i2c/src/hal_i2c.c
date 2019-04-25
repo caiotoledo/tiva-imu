@@ -54,6 +54,7 @@ static const tI2C_Conf i2c_configurations[] =
                 },
         },
 };
+static millis ms_func;
 
 static const tI2C_Pin_Conf *GetI2CConf(eI2C_BASE i2c)
 {
@@ -70,10 +71,16 @@ static const tI2C_Pin_Conf *GetI2CConf(eI2C_BASE i2c)
     return i2c_pin_conf;
 }
 
-void I2C_Enable(eI2C_BASE i2c)
+void I2C_Enable(eI2C_BASE i2c, millis f)
 {
-    const tI2C_Pin_Conf *i2c_pin_conf;
 
+    /* Store milliseconds function: */
+    if (f != 0U)
+    {
+        ms_func = f;
+    }
+
+    const tI2C_Pin_Conf *i2c_pin_conf;
     i2c_pin_conf = GetI2CConf(i2c);
     /* Return if no valid configuration was found */
     if (i2c_pin_conf == 0U)
