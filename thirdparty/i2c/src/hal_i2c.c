@@ -56,6 +56,7 @@ static const tI2C_Conf i2c_configurations[] =
                 },
         },
 };
+typedef uint32_t (*millis)();
 static millis ms_func;
 
 static const tI2C_Pin_Conf *GetI2CConf(eI2C_BASE i2c)
@@ -101,13 +102,13 @@ end_wait:
     return flag;
 }
 
-void I2C_Enable(eI2C_BASE i2c, millis f)
+void I2C_Enable(eI2C_BASE i2c, millis func)
 {
 
     /* Store milliseconds function: */
-    if (f != 0U)
+    if (func != 0U)
     {
-        ms_func = f;
+        ms_func = func;
     }
 
     const tI2C_Pin_Conf *i2c_pin_conf;

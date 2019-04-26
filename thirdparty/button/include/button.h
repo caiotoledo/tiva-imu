@@ -6,9 +6,20 @@ typedef enum {
     ButtonSW2,
 } eButtonSW;
 
-typedef uint32_t (*millis)();
+/**
+ * @brief Enable all buttons GPIOs.
+ * 
+ * @param func Pointer function to provide the ms counter
+ */
+void Button_Enable(uint32_t (*func)());
 
-void Button_Enable(millis f);
+/**
+ * @brief Get the button state.
+ * 
+ * @param b Button desired
+ * @return true Button pressed
+ * @return false Button released
+ */
 bool Button_Get_State(eButtonSW b);
 
 

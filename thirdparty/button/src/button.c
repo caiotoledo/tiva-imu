@@ -74,17 +74,18 @@ tMapButton MapButton[] =
 static const tButtonData *GetButtonData(eButtonSW button);
 static bool GetButtonState(eButtonSW button);
 static void Button_ISP_Handler();
+typedef uint32_t (*millis)();
 static millis ms_func;
 
 /*
 *       EXTERNAL FUNCTIONS
 */
-void Button_Enable(millis f)
+void Button_Enable(uint32_t (*func)())
 {
     /* Store milliseconds function: */
-    if (f != 0U)
+    if (func != 0U)
     {
-        ms_func = f;
+        ms_func = func;
     }
 
     SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOF);
