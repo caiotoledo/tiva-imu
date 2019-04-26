@@ -90,7 +90,7 @@ static bool WaitI2CMasterBusy(eI2C_BASE i2c, uint32_t timeout)
 
     while (I2CMasterBusy(i2c_pin_conf->I2CBase))
     {
-        if ( (ms_func() - start) > I2C_TIMEOUT_MS )
+        if ( (ms_func() - start) > timeout )
         {
             goto end_wait;
         }
