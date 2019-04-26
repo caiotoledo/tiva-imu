@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdarg.h>
 
 #include <tm4c123gh6pm_target_definitions.h>
 
@@ -171,4 +172,66 @@ uint32_t I2C_Read_Reg(eI2C_BASE i2c, uint8_t slave_addr, uint8_t reg_addr)
 
 end_read:
     return val;
+}
+
+void I2C_Send(eI2C_BASE i2c, uint8_t slave_addr, uint8_t reg_addr, uint8_t num_of_args, ...)
+{
+    const tI2C_Pin_Conf *i2c_pin_conf;
+    i2c_pin_conf = GetI2CConf(i2c);
+    /* Return if no valid configuration was found */
+    if (i2c_pin_conf == NULL)
+    {
+        return;
+    }
+
+    // Tell the master module what address it will place on the bus when
+    // communicating with the slave.
+    I2CMasterSlaveAddrSet(i2c_pin_conf->I2CBase, slave_addr, false);
+
+    //stores list of variable number of arguments
+    va_list vargs;
+
+    //specifies the va_list to "open" and the last fixed argument
+    //so vargs knows where to start looking
+    va_start(vargs, num_of_args);
+
+    //put data to be sent into FIFO
+    I2CMasterDataPut(i2c_pin_conf->I2CBase, reg_addr);
+
+    //Initiate send of data from the MCU
+    I2CMasterControl(i2c_pin_conf->I2CBase, I2C_MASTER_CMD_BURST_SEND_START);
+
+    // Wait until MCU is done transferring.
+    if (!WaitI2CMasterBusy(i2c, I2C_TIMEOUT_MS))
+    {
+        return;
+    }
+
+    //send num_of_args-2 pieces of data, using the
+    //BURST_SEND_CONT command of the I2C module
+    for (uint8_t i = 0; i < num_of_args; i++)
+    {
+        //put next piece of data into I2C FIFO
+        I2CMasterDataPut(i2c_pin_conf->I2CBase, va_arg(vargs, uint32_t));
+
+        if (i < (num_of_args-1) )
+        {
+            /* Send Cont Burst command */
+            I2CMasterControl(i2c_pin_conf->I2CBase, I2C_MASTER_CMD_BURST_SEND_CONT);
+        }
+        else
+        {
+            /* Send Last Burst command */
+            I2CMasterControl(i2c_pin_conf->I2CBase, I2C_MASTER_CMD_BURST_SEND_FINISH);
+        }
+
+        // Wait until MCU is done transferring.
+        if (!WaitI2CMasterBusy(i2c, I2C_TIMEOUT_MS))
+        {
+            return;
+        }
+    }
+
+    //"close" variable args list
+    va_end(vargs);
 }
