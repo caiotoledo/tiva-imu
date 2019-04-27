@@ -16,7 +16,6 @@
 
 #include <version.h>
 #include <LED_RGB.h>
-#include <hal_i2c.h>
 #include <hal_uart.h>
 #include <log.h>
 
@@ -27,14 +26,15 @@
 #include <semphr.h>
 
 #include "led_task.h"
+#include "mpu6050_task.h"
 
 #define PROGRAM_NAME            "tiva-imu"
 
 /* FreeRTOS Macros Tasks */
 #define TASK_LED_PRIORITY       (tskIDLE_PRIORITY)
 #define TASK_LED_STACKSIZE      (configMINIMAL_STACK_SIZE)
-#define TASK_I2C_PRIORITY       (TASK_LED_PRIORITY+1)
-#define TASK_I2C_STACKSIZE      (configMINIMAL_STACK_SIZE)
+#define TASK_MPU6050_PRIORITY   (TASK_LED_PRIORITY+1)
+#define TASK_MPU6050_STACKSIZE  (configMINIMAL_STACK_SIZE)
 
 #define UNUSED(x)               ((void)x)
 
@@ -52,24 +52,6 @@ void vApplicationStackOverflowHook(TaskHandle_t xTask, signed char *pcTaskName)
     corrupt. */
     for (;;)
     {
-    }
-}
-
-void vI2CTask (void *pvParam)
-{
-    I2C_Enable(I2C1, GetMillis);
-    for(;;)
-    {
-        uint32_t val = I2C_Read_Reg(I2C1, 0x68, 0x75);
-        if (val == 0x68)
-        {
-            INFO("MPU6050 found [0x%02X]", val);
-        }
-        else
-        {
-            ERROR("MPU6050 NOT found [0x%02X]", val);
-        }
-        vTaskDelay(1000 / portTICK_RATE_MS);
     }
 }
 
@@ -98,7 +80,7 @@ int main()
         while(1);
     }
 
-    if (xTaskCreate(vI2CTask, "I2C Task", TASK_I2C_STACKSIZE, NULL, TASK_I2C_PRIORITY, NULL) != pdPASS)
+    if (xTaskCreate(vMPU6050Task, "MPU6050 Task", TASK_MPU6050_STACKSIZE, NULL, TASK_MPU6050_PRIORITY, NULL) != pdPASS)
     {
         LED_Set(RED_LED, true);
         while(1);

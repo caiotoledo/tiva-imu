@@ -29,13 +29,15 @@ add_subdirectory(thirdparty/freertos ./build_freertos)
 add_subdirectory(thirdparty/rgb ./build_rgb)
 # Add I2C library
 add_subdirectory(thirdparty/i2c ./build_i2c)
+# Add MPU6050 library
+add_subdirectory(thirdparty/mpu6050 ./build_mpu6050)
 # Add Button library
 add_subdirectory(thirdparty/button ./build_button)
 # Add UART library
 add_subdirectory(thirdparty/uart ./build_uart)
 
 # Link all libraries
-target_link_libraries(${PROJECT_NAME} freertos rgb i2c button uart)
+target_link_libraries(${PROJECT_NAME} freertos rgb mpu6050 button uart)
 
 # define objcopy macro
 macro(OBJCOPY_FILE EXE_NAME)
