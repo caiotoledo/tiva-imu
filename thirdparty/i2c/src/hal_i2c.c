@@ -174,6 +174,68 @@ end_read:
     return val;
 }
 
+int I2C_Read_Multiple_Reg(eI2C_BASE i2c, uint8_t slave_addr, uint8_t reg_addr, uint8_t len, uint8_t *buffer)
+{
+    int ret = -1;
+
+    const tI2C_Pin_Conf *i2c_pin_conf;
+    i2c_pin_conf = GetI2CConf(i2c);
+    /* Return if no valid configuration was found */
+    if (i2c_pin_conf == NULL)
+    {
+        goto end_read;
+    }
+
+    /* Set slave address */
+    I2CMasterSlaveAddrSet(i2c_pin_conf->I2CBase, slave_addr, false);
+
+    /* Set register address */
+    I2CMasterDataPut(i2c_pin_conf->I2CBase, reg_addr);
+    I2CMasterControl(i2c_pin_conf->I2CBase, I2C_MASTER_CMD_BURST_SEND_START);
+    if (!WaitI2CMasterBusy(i2c, I2C_TIMEOUT_MS))
+    {
+        goto end_read;
+    }
+
+    /* Set read operation */
+    I2CMasterSlaveAddrSet(i2c_pin_conf->I2CBase, slave_addr, true);
+
+    /* Start Receive value */
+    I2CMasterControl(i2c_pin_conf->I2CBase, I2C_MASTER_CMD_BURST_RECEIVE_START);
+    if (!WaitI2CMasterBusy(i2c, I2C_TIMEOUT_MS))
+    {
+        goto end_read;
+    }
+
+    ret = 0;
+    for (size_t i = 0; i < len; i++)
+    {
+        /* Receive the message */
+        buffer[i] = (uint8_t)I2CMasterDataGet(i2c_pin_conf->I2CBase);
+        ret++;
+
+        /* Signal to the bus to keep transmitting */
+        if ( i < (len -1) )
+        {
+            I2CMasterControl(i2c_pin_conf->I2CBase, I2C_MASTER_CMD_BURST_RECEIVE_CONT);
+            if (!WaitI2CMasterBusy(i2c, I2C_TIMEOUT_MS))
+            {
+                goto end_read;
+            }
+        }
+    }
+
+    /* Finish Transmission */
+    I2CMasterControl(i2c_pin_conf->I2CBase, I2C_MASTER_CMD_BURST_RECEIVE_FINISH);
+    if (!WaitI2CMasterBusy(i2c, I2C_TIMEOUT_MS))
+    {
+        goto end_read;
+    }
+
+end_read:
+    return ret;
+}
+
 void I2C_Send(eI2C_BASE i2c, uint8_t slave_addr, uint8_t reg_addr, uint8_t num_of_args, ...)
 {
     const tI2C_Pin_Conf *i2c_pin_conf;
