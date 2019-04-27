@@ -17,8 +17,9 @@ typedef enum {
  * 
  * @param i2c I2C Interface
  * @param func Pointer function to provide the ms counter
+ * @return int Return 0 on success
  */
-void I2C_Enable(eI2C_BASE i2c, uint32_t (*func)());
+int I2C_Enable(eI2C_BASE i2c, uint32_t (*func)());
 
 /**
  * @brief Read a register from an slave address

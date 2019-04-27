@@ -103,13 +103,17 @@ end_wait:
     return flag;
 }
 
-void I2C_Enable(eI2C_BASE i2c, millis func)
+int I2C_Enable(eI2C_BASE i2c, uint32_t (*func)())
 {
-
+    int ret = -1;
     /* Store milliseconds function: */
     if (func != 0U)
     {
         ms_func = func;
+    }
+    else
+    {
+        goto end_enable;
     }
 
     const tI2C_Pin_Conf *i2c_pin_conf;
@@ -117,7 +121,7 @@ void I2C_Enable(eI2C_BASE i2c, millis func)
     /* Return if no valid configuration was found */
     if (i2c_pin_conf == NULL)
     {
-        return;
+        goto end_enable;
     }
 
     /* Enable Peripheral's Clock */
@@ -132,6 +136,15 @@ void I2C_Enable(eI2C_BASE i2c, millis func)
 
     /* Set fast speed 400KHz */
     I2CMasterInitExpClk(i2c_pin_conf->I2CBase, SysCtlClockGet(), true);
+
+    if (!WaitI2CMasterBusy(i2c, I2C_TIMEOUT_MS))
+    {
+        goto end_enable;
+    }
+
+    ret = 0;
+end_enable:
+    return ret;
 }
 
 uint32_t I2C_Read_Reg(eI2C_BASE i2c, uint8_t slave_addr, uint8_t reg_addr)
@@ -183,7 +196,7 @@ int I2C_Read_Multiple_Reg(eI2C_BASE i2c, uint8_t slave_addr, uint8_t reg_addr, u
     /* Return if no valid configuration was found */
     if (i2c_pin_conf == NULL)
     {
-        goto end_read;
+        goto end_mult_read;
     }
 
     /* Set slave address */
@@ -194,7 +207,7 @@ int I2C_Read_Multiple_Reg(eI2C_BASE i2c, uint8_t slave_addr, uint8_t reg_addr, u
     I2CMasterControl(i2c_pin_conf->I2CBase, I2C_MASTER_CMD_BURST_SEND_START);
     if (!WaitI2CMasterBusy(i2c, I2C_TIMEOUT_MS))
     {
-        goto end_read;
+        goto end_mult_read;
     }
 
     /* Set read operation */
@@ -204,7 +217,7 @@ int I2C_Read_Multiple_Reg(eI2C_BASE i2c, uint8_t slave_addr, uint8_t reg_addr, u
     I2CMasterControl(i2c_pin_conf->I2CBase, I2C_MASTER_CMD_BURST_RECEIVE_START);
     if (!WaitI2CMasterBusy(i2c, I2C_TIMEOUT_MS))
     {
-        goto end_read;
+        goto end_mult_read;
     }
 
     ret = 0;
@@ -220,7 +233,7 @@ int I2C_Read_Multiple_Reg(eI2C_BASE i2c, uint8_t slave_addr, uint8_t reg_addr, u
             I2CMasterControl(i2c_pin_conf->I2CBase, I2C_MASTER_CMD_BURST_RECEIVE_CONT);
             if (!WaitI2CMasterBusy(i2c, I2C_TIMEOUT_MS))
             {
-                goto end_read;
+                goto end_mult_read;
             }
         }
     }
@@ -229,10 +242,10 @@ int I2C_Read_Multiple_Reg(eI2C_BASE i2c, uint8_t slave_addr, uint8_t reg_addr, u
     I2CMasterControl(i2c_pin_conf->I2CBase, I2C_MASTER_CMD_BURST_RECEIVE_FINISH);
     if (!WaitI2CMasterBusy(i2c, I2C_TIMEOUT_MS))
     {
-        goto end_read;
+        goto end_mult_read;
     }
 
-end_read:
+end_mult_read:
     return ret;
 }
 
