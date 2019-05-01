@@ -18,18 +18,21 @@
 
 extern uint32_t GetMillis(void);
 
-static void vStateMachineRainbowRGB(void);
-
-static uint32_t RGBRainbowStep = RGB_RAINBOW_STEP_INITIAL;
+static void vStateMachineRainbowRGB(uint32_t rgbStep);
 
 void vLedTask(void *pvParameters)
 {
+    uint32_t RGBRainbowStep = RGB_RAINBOW_STEP_INITIAL;
+
+    /* Initialize button API */
     Button_Enable(GetMillis);
 
     for (;;)
     {
-        vStateMachineRainbowRGB();
+        /* Call Rainbow State Machine */
+        vStateMachineRainbowRGB(RGBRainbowStep);
 
+        /* Increment Rainbow Step */
         bool sw1 = Button_Get_State(ButtonSW1);
         if (sw1)
         {
@@ -41,6 +44,7 @@ void vLedTask(void *pvParameters)
             INFO("RGBRainbowStep [%u]", RGBRainbowStep);
         }
 
+        /* Decrement Rainbow Step */
         bool sw2 = Button_Get_State(ButtonSW2);
         if (sw2)
         {
@@ -51,21 +55,33 @@ void vLedTask(void *pvParameters)
             }
             INFO("RGBRainbowStep [%u]", RGBRainbowStep);
         }
+
+        /* Task sleep */
+        vTaskDelay(150 / portTICK_RATE_MS);
     }
 }
 
-static bool ApplyRGBStep(uint16_t *color, bool add)
+/**
+ * @brief Apply the RGB Step in color reference
+ *
+ * @param color Color pointer
+ * @param step Step value for color variable
+ * @param add Flag to increment or decrement the color value
+ * @return true Color variable overflow
+ * @return false Color variable didn't overflow
+ */
+static bool ApplyRGBStep(uint16_t *color, uint32_t step, bool add)
 {
     uint16_t c = *color;
     bool bIncrementStateMach = false;
 
     if (add)
     {
-        c += RGBRainbowStep;
+        c += step;
     }
     else
     {
-        c -= RGBRainbowStep;
+        c -= step;
     }
 
     if (c >= RGB_MAX_VALUE)
@@ -78,48 +94,50 @@ static bool ApplyRGBStep(uint16_t *color, bool add)
     return bIncrementStateMach;
 }
 
-static void vStateMachineRainbowRGB(void)
+static void vStateMachineRainbowRGB(uint32_t rgbStep)
 {
 
+    /* Initializing variable values */
     static uint8_t state = 0;
     static uint16_t red = RGB_MAX_VALUE;
     static uint16_t green = RGB_MIN_VALUE;
     static uint16_t blue = RGB_MIN_VALUE;
 
+    /* Apply the RGB step based on the current state */
     switch (state)
     {
     case 0:
-        if (ApplyRGBStep(&green, true))
+        if (ApplyRGBStep(&green, rgbStep, true))
         {
             state++;
         }
         break;
     case 1:
-        if (ApplyRGBStep(&red, false))
+        if (ApplyRGBStep(&red, rgbStep, false))
         {
             state++;
         }
         break;
     case 2:
-        if (ApplyRGBStep(&blue, true))
+        if (ApplyRGBStep(&blue, rgbStep, true))
         {
             state++;
         }
         break;
     case 3:
-        if (ApplyRGBStep(&green, false))
+        if (ApplyRGBStep(&green, rgbStep, false))
         {
             state++;
         }
         break;
     case 4:
-        if (ApplyRGBStep(&red, true))
+        if (ApplyRGBStep(&red, rgbStep, true))
         {
             state++;
         }
         break;
     case 5:
-        if (ApplyRGBStep(&blue, false))
+        if (ApplyRGBStep(&blue, rgbStep, false))
         {
             state = 0;
         }
@@ -129,6 +147,6 @@ static void vStateMachineRainbowRGB(void)
         break;
     }
 
+    /* Update the RGB values */
     RGB_Set(red, green, blue);
-    vTaskDelay(150 / portTICK_RATE_MS);
 }
