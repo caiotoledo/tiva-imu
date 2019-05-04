@@ -23,12 +23,20 @@ void vMPU6050Task(void *pvParameters)
 
     for(;;)
     {
-        uint8_t val1 = I2C_Read_Reg(I2C1, 0x68, 0x3B);
-        INFO("0x3B = [0x%02X]", val1);
-
-        uint8_t values[2] = {0};
-        int ret = I2C_Read_Multiple_Reg(I2C1, 0x68, 0x3B, sizeof(values), values);
-        INFO("Multiple[%d] = [0x%02X%02X]", ret, values[0], values[1]);
+        int ret = MPU6050_Probe(MPU6050_LOW);
+        if (ret == 0)
+        {
+            accel_t val;
+            ret = MPU6050_ReadAllAccel(MPU6050_LOW, &val);
+            if (ret == 0)
+            {
+                INFO("[%d] - X[%04d] Y[%04d] Z[%04d]", GetMillis(), (int32_t) val.x, (int32_t) val.y, (int32_t) val.z);
+            }
+        }
+        else
+        {
+            ERROR("MPU6050 NOT Present!");
+        }
 
         vTaskDelay(1000 / portTICK_RATE_MS);
     }
