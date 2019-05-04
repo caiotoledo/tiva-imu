@@ -29,18 +29,10 @@ void vMPU6050Task(TimerHandle_t xTimer)
     }
 
     uint32_t ticks = GetMillis();
-    int ret = MPU6050_Probe(MPU6050_LOW);
+    accel_t val;
+    int ret = MPU6050_ReadAllAccel(MPU6050_LOW, &val);
     if (ret == 0)
     {
-        accel_t val;
-        ret = MPU6050_ReadAllAccel(MPU6050_LOW, &val);
-        if (ret == 0)
-        {
-            INFO("[%d] - X[%04d] Y[%04d] Z[%04d]", ticks, (int32_t)val.x, (int32_t)val.y, (int32_t)val.z);
-        }
-    }
-    else
-    {
-        ERROR("MPU6050 NOT Present!");
+        INFO("[%d] - X[%04d] Y[%04d] Z[%04d]", ticks, (int32_t)val.x, (int32_t)val.y, (int32_t)val.z);
     }
 }

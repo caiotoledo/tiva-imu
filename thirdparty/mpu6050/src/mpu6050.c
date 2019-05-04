@@ -192,12 +192,6 @@ int MPU6050_ReadAllAccel(eMPU6050_BASE mpu,  accel_t *accel)
     tMPU6050_Conf *mpu_conf;
     GET_CONF(mpu_conf, mpu, end_mpu6050_readaccel);
 
-    /* Probe IMU presence */
-    if (MPU6050_Probe(mpu) != 0)
-    {
-        goto end_mpu6050_readaccel;
-    }
-
     /* Get Raw Acceleration values */
     uint8_t val[8] = { 0 };
     int ret_read = I2C_Read_Multiple_Reg(mpu_conf->conf.i2c, mpu_conf->addr, MPU6050_ACCEL_XOUT_H, sizeof(val), val);
