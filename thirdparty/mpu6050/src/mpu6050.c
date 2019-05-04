@@ -209,7 +209,7 @@ int MPU6050_ReadAllAccel(eMPU6050_BASE mpu,  accel_t *accel)
 
     /* Acceleration Conversion */
     double output_accel[3] = { 0 };
-    for (size_t i = 0; i < sizeof(val); i++)
+    for (size_t i = 0; i < sizeof(val); i+=2)
     {
         uint16_t raw_accel = (uint16_t)( (val[i] << 8) | val[i+1] );
         if ( !(raw_accel & 0x8000) )
