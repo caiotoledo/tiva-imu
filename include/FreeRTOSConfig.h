@@ -54,6 +54,9 @@
 #ifndef FREERTOS_CONFIG_H
 #define FREERTOS_CONFIG_H
 
+#include <stdbool.h>
+#include "driverlib/sysctl.h"
+
 /*-----------------------------------------------------------
  * Application specific definitions.
  *
@@ -69,7 +72,7 @@
 #define configUSE_PREEMPTION                1
 #define configUSE_IDLE_HOOK                 0
 #define configUSE_TICK_HOOK                 0
-#define configCPU_CLOCK_HZ                  ( ( unsigned long ) 50000000 )
+#define configCPU_CLOCK_HZ                  ( SysCtlClockGet() )
 #define configTICK_RATE_HZ                  ( ( portTickType ) 1000 )
 #define configMINIMAL_STACK_SIZE            ( ( unsigned short ) 200 )
 #define configTOTAL_HEAP_SIZE               ( ( size_t ) ( 30000 ) )
