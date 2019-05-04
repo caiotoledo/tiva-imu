@@ -38,6 +38,8 @@
 
 #define UNUSED(x)               ((void)x)
 
+TimerHandle_t xTimerMPU6050;
+
 uint32_t GetMillis(void);
 
 void vApplicationStackOverflowHook(TaskHandle_t xTask, signed char *pcTaskName)
@@ -53,6 +55,12 @@ void vApplicationStackOverflowHook(TaskHandle_t xTask, signed char *pcTaskName)
     for (;;)
     {
     }
+}
+
+static void vFaultFunc(void)
+{
+    LED_Set(RED_LED, true);
+    while (1);
 }
 
 uint32_t GetMillis(void)
@@ -76,14 +84,20 @@ int main()
 
     if (xTaskCreate(vLedTask, "LED Task", TASK_LED_STACKSIZE, NULL, TASK_LED_PRIORITY, NULL) != pdPASS)
     {
-        LED_Set(RED_LED, true);
-        while(1);
+        vFaultFunc();
     }
 
-    if (xTaskCreate(vMPU6050Task, "MPU6050 Task", TASK_MPU6050_STACKSIZE, NULL, TASK_MPU6050_PRIORITY, NULL) != pdPASS)
+    xTimerMPU6050 = xTimerCreate("MPU6050 Timer", (1000/portTICK_RATE_MS), pdTRUE, NULL, vMPU6050Task);
+    if ( xTimerMPU6050 == NULL )
     {
-        LED_Set(RED_LED, true);
-        while(1);
+        vFaultFunc();
+    }
+    else
+    {
+        if (xTimerStart( xTimerMPU6050, 0 ) != pdPASS)
+        {
+            vFaultFunc();
+        }
     }
 
     vTaskStartScheduler();

@@ -11,33 +11,36 @@
 
 extern uint32_t GetMillis(void);
 
-void vMPU6050Task(void *pvParameters)
+bool bIMUEnabled = false;
+
+void vMPU6050Task(TimerHandle_t xTimer)
 {
-    int ret = MPU6050_Enable(MPU6050_LOW, I2C1, GetMillis);
-    if (ret != 0)
+    if (!bIMUEnabled)
     {
-        ERROR("MPU6050 Error, Suspend task!");
-        /* Stop this Task */
-        vTaskSuspend(NULL);
+        int ret = MPU6050_Enable(MPU6050_LOW, I2C1, GetMillis);
+        if (ret != 0)
+        {
+            ERROR("MPU6050 Error, Suspend task!");
+            /* Stop this Task */
+            xTimerStop(xTimer, 0);
+            return;
+        }
+        bIMUEnabled = true;
     }
 
-    for(;;)
+    uint32_t ticks = GetMillis();
+    int ret = MPU6050_Probe(MPU6050_LOW);
+    if (ret == 0)
     {
-        int ret = MPU6050_Probe(MPU6050_LOW);
+        accel_t val;
+        ret = MPU6050_ReadAllAccel(MPU6050_LOW, &val);
         if (ret == 0)
         {
-            accel_t val;
-            ret = MPU6050_ReadAllAccel(MPU6050_LOW, &val);
-            if (ret == 0)
-            {
-                INFO("[%d] - X[%04d] Y[%04d] Z[%04d]", GetMillis(), (int32_t) val.x, (int32_t) val.y, (int32_t) val.z);
-            }
+            INFO("[%d] - X[%04d] Y[%04d] Z[%04d]", ticks, (int32_t)val.x, (int32_t)val.y, (int32_t)val.z);
         }
-        else
-        {
-            ERROR("MPU6050 NOT Present!");
-        }
-
-        vTaskDelay(1000 / portTICK_RATE_MS);
+    }
+    else
+    {
+        ERROR("MPU6050 NOT Present!");
     }
 }

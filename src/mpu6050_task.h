@@ -3,9 +3,9 @@
 
 /**
  * @brief Task to interact with IMU MPU6050
- *
- * @param pvParameters Unused parameter
+ * 
+ * @param xTimer FreeRTOS Timer Handler
  */
-void vMPU6050Task(void *pvParameters);
+void vMPU6050Task(TimerHandle_t xTimer);
 
 #endif /* MPU6050_TASK_H_ */
