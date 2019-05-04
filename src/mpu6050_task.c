@@ -15,6 +15,9 @@ bool bIMUEnabled = false;
 
 void vMPU6050Task(TimerHandle_t xTimer)
 {
+    uint32_t ticks = GetMillis();
+    INFO("TIME %d ms", ticks);
+
     if (!bIMUEnabled)
     {
         int ret = MPU6050_Enable(MPU6050_LOW, I2C1, GetMillis);
@@ -28,11 +31,16 @@ void vMPU6050Task(TimerHandle_t xTimer)
         bIMUEnabled = true;
     }
 
-    uint32_t ticks = GetMillis();
-    accel_t val;
-    int ret = MPU6050_ReadAllAccel(MPU6050_LOW, &val);
+    accel_t accel;
+    int ret = MPU6050_ReadAllAccel(MPU6050_LOW, &accel);
     if (ret == 0)
     {
-        INFO("[%d] - X[%04d] Y[%04d] Z[%04d]", ticks, (int32_t)val.x, (int32_t)val.y, (int32_t)val.z);
+        INFO("[Accel] X[%05d] Y[%05d] Z[%05d]", (int32_t)accel.x, (int32_t)accel.y, (int32_t)accel.z);
+    }
+    gyro_t gyro;
+    ret = MPU6050_ReadAllGyro(MPU6050_LOW, &gyro);
+    if (ret == 0)
+    {
+        INFO("[Gyro] X[%05d] Y[%05d] Z[%05d]", (int32_t)gyro.x, (int32_t)gyro.y, (int32_t)gyro.z);
     }
 }

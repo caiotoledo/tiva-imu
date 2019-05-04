@@ -74,6 +74,7 @@ typedef struct
     tMPU6050_Data conf;
 } tMPU6050_Conf;
 
+static double ConvertIMUVal(uint16_t val, double constant);
 inline static tMPU6050_Conf *GetMPU6050Conf(eMPU6050_BASE mpu);
 /* TODO: Implement function: */
 // static void SetMPU6050Data(eMPU6050_BASE mpu, tMPU6050_Data *data);
@@ -206,15 +207,7 @@ int MPU6050_ReadAllAccel(eMPU6050_BASE mpu,  accel_t *accel)
     for (size_t i = 0; i < sizeof(val); i+=2)
     {
         uint16_t raw_accel = (uint16_t)( (val[i] << 8) | val[i+1] );
-        if ( !(raw_accel & 0x8000) )
-        {
-            output_accel[i/2] = ((float) raw_accel) / CONST_ACCEL;
-        }
-        else
-        {
-            raw_accel = (((~raw_accel) + 1) & 0x7FFF);
-            output_accel[i/2] = -(((float)raw_accel) / CONST_ACCEL);
-        }
+        output_accel[i/2] = ConvertIMUVal(raw_accel, CONST_ACCEL);
         /* TODO: Implement Acceleration Offset */
     }
 
@@ -226,6 +219,58 @@ int MPU6050_ReadAllAccel(eMPU6050_BASE mpu,  accel_t *accel)
     ret = 0;
 
 end_mpu6050_readaccel:
+    return ret;
+}
+
+int MPU6050_ReadAllGyro(eMPU6050_BASE mpu, gyro_t *gyro)
+{
+    int ret = -1;
+
+    /* Get MPU configuration */
+    tMPU6050_Conf *mpu_conf;
+    GET_CONF(mpu_conf, mpu, end_mpu6050_readgyro);
+
+    /* Get Raw Acceleration values */
+    uint8_t val[8] = {0};
+    int ret_read = I2C_Read_Multiple_Reg(mpu_conf->conf.i2c, mpu_conf->addr, MPU6050_GYRO_XOUT_H, sizeof(val), val);
+    if (ret_read != sizeof(val))
+    {
+        ERROR("Read gyro registers failed");
+        goto end_mpu6050_readgyro;
+    }
+
+    /* Acceleration Conversion */
+    double output_gyro[3] = {0};
+    for (size_t i = 0; i < sizeof(val); i += 2)
+    {
+        uint16_t raw_gyro = (uint16_t)((val[i] << 8) | val[i + 1]);
+        output_gyro[i/2] = ConvertIMUVal(raw_gyro, CONST_GYRO);
+        /* TODO: Implement Gyro Offset */
+    }
+
+    /* Store in the output buffer */
+    gyro->x = output_gyro[0];
+    gyro->y = output_gyro[1];
+    gyro->z = output_gyro[2];
+
+    ret = 0;
+
+end_mpu6050_readgyro:
+    return ret;
+}
+
+static double ConvertIMUVal(uint16_t val, double constant)
+{
+    double ret = 0;
+    if (!(val & 0x8000))
+    {
+        ret = ((double)val) / constant;
+    }
+    else
+    {
+        val = (((~val) + 1) & 0x7FFF);
+        ret = -(((double)val) / constant);
+    }
     return ret;
 }
 

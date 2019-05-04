@@ -15,6 +15,12 @@ typedef struct
     double z;
 } accel_t;
 
+typedef struct
+{
+    double x;
+    double y;
+    double z;
+} gyro_t;
 
 /**
  * @brief Enable MPU6050
@@ -42,5 +48,14 @@ int MPU6050_Probe(eMPU6050_BASE mpu);
  * @return int Return 0 if successful
  */
 int MPU6050_ReadAllAccel(eMPU6050_BASE mpu,  accel_t *accel);
+
+/**
+ * @brief Return each axis gyroscope
+ *
+ * @param mpu MPU Interface (see #eMPU6050_BASE)
+ * @param gyro Pointer to output struct (see #gyro_t)
+ * @return int Return 0 if successful
+ */
+int MPU6050_ReadAllGyro(eMPU6050_BASE mpu,  gyro_t *gyro);
 
 #endif /* MPU6050_H_ */
