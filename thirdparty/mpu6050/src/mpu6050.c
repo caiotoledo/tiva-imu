@@ -6,7 +6,22 @@
 #include <hal_i2c.h>
 #include <mpu6050.h>
 
-#define INVALID_ADDR       (0xFF)
+#define INVALID_ADDR                (0xFF)
+
+#define CONST_ACCEL                 (16.384)
+#define CONST_GYRO                  (131)
+
+#define DEFAULT_I2C_INTERFACE       (I2C0)
+
+#define GET_CONF(pConf, mpu, error_goto)            \
+{                                                   \
+    pConf = GetMPU6050Conf(mpu);                    \
+    if (pConf == NULL)                              \
+    {                                               \
+        ERROR("Invalid Configuration! [%d]", mpu);  \
+        goto error_goto;                            \
+    }                                               \
+}                                                   \
 
 typedef enum
 {
@@ -59,7 +74,7 @@ typedef struct
     tMPU6050_Data conf;
 } tMPU6050_Conf;
 
-static tMPU6050_Conf *GetMPU6050Conf(eMPU6050_BASE mpu);
+inline static tMPU6050_Conf *GetMPU6050Conf(eMPU6050_BASE mpu);
 /* TODO: Implement function: */
 // static void SetMPU6050Data(eMPU6050_BASE mpu, tMPU6050_Data *data);
 
@@ -83,7 +98,7 @@ static tMPU6050_Conf mpu_configurations[] =
         .addr = 0x68,
         .conf =
             {
-                .i2c =  I2C0,
+                .i2c =  DEFAULT_I2C_INTERFACE,
                 .map = reg_configuration,
             },
     },
@@ -92,7 +107,7 @@ static tMPU6050_Conf mpu_configurations[] =
         .addr = 0x69,
         .conf =
             {
-                .i2c =  I2C0,
+                .i2c =  DEFAULT_I2C_INTERFACE,
                 .map = reg_configuration,
             },
     },
@@ -112,13 +127,7 @@ int MPU6050_Enable(eMPU6050_BASE mpu, eI2C_BASE i2c, uint32_t (*func)())
     }
 
     tMPU6050_Conf *mpu_conf;
-    mpu_conf = GetMPU6050Conf(mpu);
-    /* Return if no valid configuration was found */
-    if (mpu_conf == NULL)
-    {
-        ERROR("Invalid Configuration!");
-        goto end_mpu6050_enable;
-    }
+    GET_CONF(mpu_conf, mpu, end_mpu6050_enable);
 
     /* Enable I2C interface: */
     int retI2C = I2C_Enable(i2c, func);
@@ -128,16 +137,18 @@ int MPU6050_Enable(eMPU6050_BASE mpu, eI2C_BASE i2c, uint32_t (*func)())
         goto end_mpu6050_enable;
     }
 
-    /* Verify the IMU presence */
-    uint32_t who_am_I = I2C_Read_Reg(I2C1, mpu_conf->addr, MPU6050_WHO_AM_I);
-    if (who_am_I != mpu_conf->addr)
+    /* Update MPU6050 I2C Interface */
+    eI2C_BASE last_i2c_interface = mpu_conf->conf.i2c;
+    mpu_conf->conf.i2c = i2c;
+
+    /* Probe IMU */
+    int probe_ret = MPU6050_Probe(mpu);
+    if (probe_ret != 0)
     {
-        ERROR("Device not found [0x%04X]", who_am_I);
+        /* Reset its I2C interface if not found */
+        mpu_conf->conf.i2c = last_i2c_interface;
         goto end_mpu6050_enable;
     }
-
-    /* Update MPU6050 I2C Interface */
-    mpu_conf->conf.i2c = i2c;
 
     tMPU6050_Addr_Map *registers_map = mpu_conf->conf.map;
     /* Configure MPU6050 */
@@ -151,7 +162,80 @@ end_mpu6050_enable:
     return ret;
 }
 
-static tMPU6050_Conf *GetMPU6050Conf(eMPU6050_BASE mpu)
+int MPU6050_Probe(eMPU6050_BASE mpu)
+{
+    int ret = -1;
+
+    tMPU6050_Conf *mpu_conf;
+    GET_CONF(mpu_conf, mpu, end_mpu6050_probe);
+
+    /* Verify the IMU presence */
+    uint32_t who_am_I = I2C_Read_Reg(mpu_conf->conf.i2c, mpu_conf->addr, MPU6050_WHO_AM_I);
+    if (who_am_I != mpu_conf->addr)
+    {
+        ERROR("Device not found [0x%04X]", who_am_I);
+        goto end_mpu6050_probe;
+    }
+
+    /* Found IMU in I2C bus */
+    ret = 0;
+
+end_mpu6050_probe:
+    return ret;
+}
+
+int MPU6050_ReadAllAccel(eMPU6050_BASE mpu,  accel_t *accel)
+{
+    int ret = -1;
+
+    /* Get MPU configuration */
+    tMPU6050_Conf *mpu_conf;
+    GET_CONF(mpu_conf, mpu, end_mpu6050_readaccel);
+
+    /* Probe IMU presence */
+    if (MPU6050_Probe(mpu) != 0)
+    {
+        goto end_mpu6050_readaccel;
+    }
+
+    /* Get Raw Acceleration values */
+    uint8_t val[8] = { 0 };
+    int ret_read = I2C_Read_Multiple_Reg(mpu_conf->conf.i2c, mpu_conf->addr, MPU6050_ACCEL_XOUT_H, sizeof(val), val);
+    if (ret_read != sizeof(val))
+    {
+        ERROR("Read accel registers failed");
+        goto end_mpu6050_readaccel;
+    }
+
+    /* Acceleration Conversion */
+    double output_accel[3] = { 0 };
+    for (size_t i = 0; i < sizeof(val); i++)
+    {
+        uint16_t raw_accel = (uint16_t)( (val[i] << 8) | val[i+1] );
+        if ( !(raw_accel & 0x8000) )
+        {
+            output_accel[i/2] = ((float) raw_accel) / CONST_ACCEL;
+        }
+        else
+        {
+            raw_accel = (((~raw_accel) + 1) & 0x7FFF);
+            output_accel[i/2] = -(((float)raw_accel) / CONST_ACCEL);
+        }
+        /* TODO: Implement Acceleration Offset */
+    }
+
+    /* Store in the output buffer */
+    accel->x = output_accel[0];
+    accel->y = output_accel[1];
+    accel->z = output_accel[2];
+
+    ret = 0;
+
+end_mpu6050_readaccel:
+    return ret;
+}
+
+inline static tMPU6050_Conf *GetMPU6050Conf(eMPU6050_BASE mpu)
 {
     tMPU6050_Conf *mpu_conf = NULL;
     /* Search for I2C configuration */
