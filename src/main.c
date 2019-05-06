@@ -88,16 +88,9 @@ int main()
     }
 
     xTimerMPU6050 = xTimerCreate("MPU6050 Timer", (1000/portTICK_RATE_MS), pdTRUE, NULL, vMPU6050Task);
-    if ( xTimerMPU6050 == NULL )
+    if ( (xTimerMPU6050 == NULL) || (xTimerStart(xTimerMPU6050, 0) != pdPASS) )
     {
         vFaultFunc();
-    }
-    else
-    {
-        if (xTimerStart( xTimerMPU6050, 0 ) != pdPASS)
-        {
-            vFaultFunc();
-        }
     }
 
     vTaskStartScheduler();
