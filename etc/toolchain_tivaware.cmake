@@ -30,7 +30,7 @@ set(MCU "TM4C123GH6PM")
 set(LD_SCRIPT "${MCU}.ld")
 set(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS "")
 set(CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS "")
-set(CMAKE_EXE_LINKER_FLAGS "-T${PROJECT_SOURCE_DIR}/etc/${LD_SCRIPT} -specs=${PROJECT_SOURCE_DIR}/etc/tiva.specs")
+set(CMAKE_EXE_LINKER_FLAGS "-T${PROJECT_SOURCE_DIR}/etc/${LD_SCRIPT} -specs=nano.specs -specs=nosys.specs -specs=${PROJECT_SOURCE_DIR}/etc/tiva.specs")
 
 # add GCC specific definitions
 add_definitions(-Dgcc)

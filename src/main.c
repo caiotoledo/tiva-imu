@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdio.h>
 
 #include "tm4c123gh6pm_target_definitions.h"
 
@@ -78,6 +79,10 @@ int main()
     /* Start Program */
     INFO("Start %s", PROGRAM_NAME);
     INFO("Version: %u.%u.%u.%d", MAJOR_VERSION, MINOR_VERSION, RELEASE_VERSION, __INT_TIMESTAMP__);
+
+    INFO("Test: %f", 2.0f);
+    char buf[256] = {0};
+    sprintf(buf, "%u", 10U);
 
     /* Initialize LEDs */
     LED_Enable();

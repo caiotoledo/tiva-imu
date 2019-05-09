@@ -1,7 +1,7 @@
 MEMORY
 {
     FLASH (rx) : ORIGIN = 0x00000000, LENGTH = 0x00040000
-    SRAM (rwx) : ORIGIN = 0x20000000, LENGTH = 0X00008000
+    SRAM (rwx) : ORIGIN = 0x20000000, LENGTH = 0X00020000
 }
 
 SECTIONS
@@ -19,8 +19,22 @@ SECTIONS
         _etext = .;
     } > FLASH
 
+    .ARM.extab :
+    {
+        *(.ARM.extab* .gnu.linkonce.armextab.*)
+    } > FLASH
+
+    .ARM :
+    {
+        __exidx_start = .;
+        *(.ARM.exidx*)
+        __exidx_end = .;
+    } > FLASH
+
+    __begin_data = .;
+
     /* static data */
-    .data : AT(ADDR(.text) + SIZEOF(.text))
+    .data : AT(__begin_data)
     {
         _data = .;
         *(vtable)
@@ -28,13 +42,36 @@ SECTIONS
         _edata = .;
     } > SRAM
 
+    __begin_bss = .;
+
     /* static uninitialized data */
-    .bss :
+    .bss : AT(__begin_bss)
     {
         _bss = .;
         *(.bss*)
         *(COMMON)
         _ebss = .;
     } > SRAM
+
+    . = ALIGN(4);
+    end = .;
+    _estack = ORIGIN(SRAM) + LENGTH(SRAM) - 4;
+
+    /*.stack :
+    {
+        _sstack = .;
+        . = . + 1K;
+        _estack = .;
+    } > SRAM
+
+    . = ALIGN(4);
+
+    .heap :
+    {
+        _heap_start = .;
+        end = .;
+        . = . + 1K;
+        _heap_end = .;
+    } > SRAM*/
 
 }
