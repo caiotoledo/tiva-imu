@@ -3,7 +3,8 @@
 
 #include <hal_i2c.h>
 
-typedef enum {
+typedef enum
+{
     MPU6050_LOW,
     MPU6050_HIGH,
 } eMPU6050_BASE;
