@@ -56,7 +56,6 @@ static const tUART_Pin_Conf *GetUARTConf(eUART_BASE uart);
 
 void UART_Enable(eUART_BASE uart, uint32_t baudrate)
 {
-
     const tUART_Pin_Conf *conf = GetUARTConf(uart);
     /* Return if no valid configuration was found */
     if (conf == 0U)
@@ -64,31 +63,21 @@ void UART_Enable(eUART_BASE uart, uint32_t baudrate)
         return;
     }
 
-    //
-    // Enable the GPIO Peripheral used by the UART.
-    //
+    /* Enable the GPIO Peripheral used by the UART. */
     SysCtlPeripheralEnable(conf->GPIOPeripheral);
 
-    //
-    // Enable UART0
-    //
+    /* Enable UART0 */
     SysCtlPeripheralEnable(conf->UARTPeripheral);
 
-    //
-    // Configure GPIO Pins for UART mode.
-    //
+    /* Configure GPIO Pins for UART mode. */
     GPIOPinConfigure(conf->GPIOPinConfigRX);
     GPIOPinConfigure(conf->GPIOPinConfigTX);
     GPIOPinTypeUART(conf->GPIOPortBase, conf->GPIOPinRX | conf->GPIOPinTX);
 
-    //
-    // Use the internal 16MHz oscillator as the UART clock source.
-    //
+    /* Use the internal 16MHz oscillator as the UART clock source. */
     UARTClockSourceSet(conf->UARTBase, conf->UARTClockBase);
 
-    //
-    // Initialize the UART for console I/O.
-    //
+    /* Initialize the UART for console I/O. */
     UARTStdioConfig(0, baudrate, 16000000);
 }
 
