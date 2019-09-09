@@ -14,14 +14,14 @@
 #define DEFAULT_I2C_INTERFACE       (I2C0)
 
 #define GET_CONF(pConf, mpu, error_goto)            \
-{                                                   \
+do {                                                \
     pConf = GetMPU6050Conf(mpu);                    \
     if (pConf == NULL)                              \
     {                                               \
         ERROR("Invalid Configuration! [%d]", mpu);  \
         goto error_goto;                            \
     }                                               \
-}                                                   \
+} while(0)                                          \
 
 typedef enum
 {
