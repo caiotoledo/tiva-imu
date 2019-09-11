@@ -33,7 +33,7 @@
 /* FreeRTOS Macros Tasks */
 #define TASK_LED_PRIORITY       (tskIDLE_PRIORITY)
 #define TASK_LED_STACKSIZE      (configMINIMAL_STACK_SIZE)
-#define TASK_MPU6050_PRIORITY   (TASK_LED_PRIORITY+1)
+#define TASK_MPU6050_PERIOD     (1000/portTICK_RATE_MS)
 #define TASK_MPU6050_STACKSIZE  (configMINIMAL_STACK_SIZE)
 
 #define UNUSED(x)               ((void)x)
@@ -87,7 +87,7 @@ int main()
         vFaultFunc();
     }
 
-    xTimerMPU6050 = xTimerCreate("MPU6050 Timer", (1000/portTICK_RATE_MS), pdTRUE, NULL, vMPU6050Task);
+    xTimerMPU6050 = xTimerCreate("MPU6050 Timer", TASK_MPU6050_PERIOD, pdTRUE, NULL, vMPU6050Task);
     if ( (xTimerMPU6050 == NULL) || (xTimerStart(xTimerMPU6050, 0) != pdPASS) )
     {
         vFaultFunc();
