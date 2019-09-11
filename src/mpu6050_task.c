@@ -9,21 +9,22 @@
 #include <FreeRTOS.h>
 #include <timers.h>
 
-#define ABS(x)      x < 0 ? (-x) : x
+#define ABS(x)      x < 0 ? (-x) : (x)
 
 extern uint32_t GetMillis(void);
 static inline void vDouble2IntFrac(double input, int *integer, uint32_t *fraction, uint8_t precision);
 
-bool bIMUEnabled = false;
 
 void vMPU6050Task(TimerHandle_t xTimer)
 {
+    int ret;
+    static bool bIMUEnabled = false;
     uint32_t ticks = GetMillis();
     INFO("TIME %d ms", ticks);
 
     if (!bIMUEnabled)
     {
-        int ret = MPU6050_Enable(MPU6050_LOW, I2C1, GetMillis);
+        ret = MPU6050_Enable(MPU6050_LOW, I2C1, GetMillis);
         if (ret != 0)
         {
             ERROR("MPU6050 Error, Suspend task!");
@@ -34,8 +35,9 @@ void vMPU6050Task(TimerHandle_t xTimer)
         bIMUEnabled = true;
     }
 
+    /* Sample Accelerometer */
     accel_t accel;
-    int ret = MPU6050_ReadAllAccel(MPU6050_LOW, &accel);
+    ret = MPU6050_ReadAllAccel(MPU6050_LOW, &accel);
     if (ret == 0)
     {
         int integer[3];
@@ -45,6 +47,8 @@ void vMPU6050Task(TimerHandle_t xTimer)
         vDouble2IntFrac(accel.z, &integer[2], &frac[2], 4U);
         INFO("[Accel] X[%d.%04u] Y[%d.%04u] Z[%d.%04u]", integer[0], frac[0], integer[1], frac[1], integer[2], frac[2]);
     }
+
+    /* Sample Gyroscope */
     gyro_t gyro;
     ret = MPU6050_ReadAllGyro(MPU6050_LOW, &gyro);
     if (ret == 0)
