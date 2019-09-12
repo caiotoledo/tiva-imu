@@ -8,4 +8,6 @@
  */
 void vMPU6050Task(TimerHandle_t xTimer);
 
+void vIMULogTask(void *pvParameters);
+
 #endif /* MPU6050_TASK_H_ */

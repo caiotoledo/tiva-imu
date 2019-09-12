@@ -34,6 +34,9 @@
 /* Led task configuration */
 #define TASK_LED_PRIORITY       (tskIDLE_PRIORITY)
 #define TASK_LED_STACKSIZE      (configMINIMAL_STACK_SIZE)
+/* IMU Log task configuration */
+#define TASK_IMULOG_PRIORITY    (TASK_LED_PRIORITY+1)
+#define TASK_IMULOG_STACKSIZE   (configMINIMAL_STACK_SIZE)
 /* MPU6050 task timer configuration */
 #define TASK_MPU6050_PERIOD     (1000/portTICK_RATE_MS)
 #define TASK_MPU6050_STACKSIZE  (configMINIMAL_STACK_SIZE)
@@ -91,6 +94,11 @@ int main()
 
     xTimerMPU6050 = xTimerCreate("MPU6050 Timer", TASK_MPU6050_PERIOD, pdTRUE, NULL, vMPU6050Task);
     if ( (xTimerMPU6050 == NULL) || (xTimerStart(xTimerMPU6050, 0) != pdPASS) )
+    {
+        vFaultFunc();
+    }
+
+    if (xTaskCreate(vIMULogTask, "IMU Log Task", TASK_LED_STACKSIZE, NULL, TASK_LED_PRIORITY, NULL) != pdPASS)
     {
         vFaultFunc();
     }
