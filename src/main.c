@@ -30,9 +30,11 @@
 
 #define PROGRAM_NAME            "tiva-imu"
 
-/* FreeRTOS Macros Tasks */
+/* CONFIGURATION TASKS */
+/* Led task configuration */
 #define TASK_LED_PRIORITY       (tskIDLE_PRIORITY)
 #define TASK_LED_STACKSIZE      (configMINIMAL_STACK_SIZE)
+/* MPU6050 task timer configuration */
 #define TASK_MPU6050_PERIOD     (1000/portTICK_RATE_MS)
 #define TASK_MPU6050_STACKSIZE  (configMINIMAL_STACK_SIZE)
 
