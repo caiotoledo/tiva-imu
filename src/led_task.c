@@ -29,8 +29,15 @@ void vLedTask(void *pvParameters)
 
     for (;;)
     {
-        /* Call Rainbow State Machine */
-        vStateMachineRainbowRGB(RGBRainbowStep);
+        if (RGBRainbowStep == 0)
+        {
+            RGB_Set(0U, 0U, 0U);
+        }
+        else
+        {
+            /* Call Rainbow State Machine */
+            vStateMachineRainbowRGB(RGBRainbowStep);
+        }
 
         /* Increment Rainbow Step */
         bool sw1 = Button_Get_State(ButtonSW1);
@@ -54,6 +61,12 @@ void vLedTask(void *pvParameters)
                 RGBRainbowStep = RGB_RAINBOW_STEP_MIN;
             }
             INFO("RGBRainbowStep [%u]", RGBRainbowStep);
+
+            /* Notify LED off in logger */
+            if (RGBRainbowStep == 0)
+            {
+                INFO("PowerOff RGB LED!");
+            }
         }
 
         /* Task sleep */
