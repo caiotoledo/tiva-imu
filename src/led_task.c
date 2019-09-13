@@ -85,6 +85,12 @@ void vLedTask(void *pvParameters)
  */
 static bool ApplyRGBStep(uint16_t *color, uint32_t step, bool add)
 {
+    /* Pointer parameter protection */
+    if (color == NULL)
+    {
+        return false;
+    }
+
     uint16_t c = *color;
     bool bIncrementStateMach = false;
 
