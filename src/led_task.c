@@ -94,14 +94,8 @@ static bool ApplyRGBStep(uint16_t *color, uint32_t step, bool add)
     uint16_t c = *color;
     bool bIncrementStateMach = false;
 
-    if (add)
-    {
-        c += step;
-    }
-    else
-    {
-        c -= step;
-    }
+    /* Update color variable */
+    c += add ? step : (-step);
 
     /* Check variable overflow */
     if (c >= RGB_MAX_VALUE)
