@@ -103,6 +103,7 @@ static bool ApplyRGBStep(uint16_t *color, uint32_t step, bool add)
         c -= step;
     }
 
+    /* Check variable overflow */
     if (c >= RGB_MAX_VALUE)
     {
         c = add ? RGB_MAX_VALUE : RGB_MIN_VALUE;
@@ -125,6 +126,7 @@ static void vStateMachineRainbowRGB(uint32_t rgbStep)
     /* Apply the RGB step based on the current state */
     switch (state)
     {
+    /* Function ApplyRGBStep return true in variable overflow, so the state should increment */
     case 0:
         if (ApplyRGBStep(&green, rgbStep, true))
         {
