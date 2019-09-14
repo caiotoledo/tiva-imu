@@ -10,6 +10,9 @@
 #include <queue.h>
 #include <timers.h>
 
+#include <tasks_config.h>
+#include "mpu6050_task.h"
+
 /* Size of Queue IMU for data logging */
 #define QUEUE_IMU_LENGTH    10
 
@@ -24,19 +27,29 @@ typedef struct
 
 extern uint32_t GetMillis(void);
 static inline void vDouble2IntFrac(double input, int *integer, uint32_t *fraction, uint8_t precision);
-static void vInitQueueIMU(QueueHandle_t *queue);
-
-static QueueHandle_t xQueueIMU = NULL;
 
 void vMPU6050Task(TimerHandle_t xTimer)
 {
     int ret = 0;
+    static QueueHandle_t xQueueIMU = NULL;
     static bool bIMUEnabled = false;
 
     if (!bIMUEnabled)
     {
         /* Initialize IMU Data Queue */
-        vInitQueueIMU(&xQueueIMU);
+        xQueueIMU = xQueueCreate(QUEUE_IMU_LENGTH, sizeof(dataIMU_t));
+        if (xQueueIMU != NULL)
+        {
+            /* Create IMU Log Task passing the queue as parameter */
+            if (xTaskCreate(vIMULogTask, "IMU Log Task", TASK_IMULOG_STACKSIZE, &xQueueIMU, TASK_IMULOG_PRIORITY, NULL) != pdPASS)
+            {
+                ERROR("IMU Log Task Create Error!");
+            }
+        }
+        else
+        {
+            ERROR("Create Queue IMU data error!");
+        }
 
         ret = MPU6050_Enable(MPU6050_LOW, I2C1, GetMillis);
         if (ret != 0)
@@ -73,18 +86,13 @@ void vMPU6050Task(TimerHandle_t xTimer)
 
 void vIMULogTask(void *pvParameters)
 {
-    vInitQueueIMU(&xQueueIMU);
-    /* Suspend task if no queue was created */
-    if (xQueueIMU == NULL)
-    {
-        vTaskSuspend(NULL);
-    }
+    QueueHandle_t xQueueDataIMU = *((QueueHandle_t *)pvParameters);
 
     for(;;)
     {
         dataIMU_t data;
         /* Receive IMU data from Queue */
-        if (xQueueReceive(xQueueIMU, &(data), portMAX_DELAY) != pdFALSE)
+        if (xQueueReceive(xQueueDataIMU, &(data), portMAX_DELAY) != pdFALSE)
         {
             int integer[3];
             uint32_t frac[3];
@@ -103,14 +111,6 @@ void vIMULogTask(void *pvParameters)
             vDouble2IntFrac(data.gyro.z, &integer[2], &frac[2], 4U);
             INFO("[Gyro] X[%d.%04u] Y[%d.%04u] Z[%d.%04u]", integer[0], frac[0], integer[1], frac[1], integer[2], frac[2]);
         }
-    }
-}
-
-static void vInitQueueIMU(QueueHandle_t *queue)
-{
-    if ( (*queue) == NULL)
-    {
-        (*queue) = xQueueCreate(QUEUE_IMU_LENGTH, sizeof(dataIMU_t));
     }
 }
 

@@ -88,11 +88,6 @@ int main()
         vFaultFunc();
     }
 
-    if (xTaskCreate(vIMULogTask, "IMU Log Task", TASK_LED_STACKSIZE, NULL, TASK_LED_PRIORITY, NULL) != pdPASS)
-    {
-        vFaultFunc();
-    }
-
     vTaskStartScheduler();
 
     while (1);
