@@ -33,8 +33,6 @@
 
 #define UNUSED(x)               ((void)x)
 
-TimerHandle_t xTimerMPU6050;
-
 uint32_t GetMillis(void);
 
 void vApplicationStackOverflowHook(TaskHandle_t xTask, signed char *pcTaskName)
@@ -82,7 +80,7 @@ int main()
         vFaultFunc();
     }
 
-    xTimerMPU6050 = xTimerCreate("MPU6050 Timer", TASK_MPU6050_PERIOD, pdTRUE, NULL, vMPU6050Task);
+    TimerHandle_t xTimerMPU6050 = xTimerCreate("MPU6050 Timer", TASK_MPU6050_PERIOD, pdTRUE, NULL, vMPU6050Task);
     if ( (xTimerMPU6050 == NULL) || (xTimerStart(xTimerMPU6050, 0) != pdPASS) )
     {
         vFaultFunc();
