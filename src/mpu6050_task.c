@@ -57,6 +57,7 @@ void vMPU6050Task(TimerHandle_t xTimer)
     /* Sample Gyroscope */
     ret += MPU6050_ReadAllGyro(MPU6050_LOW, &dataimu.gyro);
 
+    /* Check if the data was successful sample */
     if (ret == 0)
     {
         if (xQueueSend(xQueueIMU, (void *)&dataimu, (500/portTICK_RATE_MS)) != pdTRUE)
@@ -122,7 +123,7 @@ static inline void vDouble2IntFrac(double input, int *integer, uint32_t *fractio
     input = ABS(input);
     int tmpInt = input;
 
-    /* Extract fraction part */
+    /* Extract fraction part in float */
     double tmpFloatFrac = input - (double)tmpInt;
     /* Running power of 10 precision */
     double valPrec = 1;
@@ -130,6 +131,7 @@ static inline void vDouble2IntFrac(double input, int *integer, uint32_t *fractio
     {
         valPrec *= 10;
     }
+    /* Get fraction value based on the precision */
     uint32_t tmpFrac = tmpFloatFrac * valPrec;
 
     /* Return values */
