@@ -62,17 +62,21 @@ void vMPU6050Task(TimerHandle_t xTimer)
         bIMUEnabled = true;
     }
 
-    dataIMU_t dataimu = { 0 };
     /* Store sample time in ms */
-    dataimu.ms = GetMillis();
+    uint32_t time_ms = GetMillis();
     /* Sample Accelerometer */
-    ret += MPU6050_ReadAllAccel(MPU6050_LOW, &dataimu.accel);
+    accel_t accel;
+    ret += MPU6050_ReadAllAccel(MPU6050_LOW, &accel);
     /* Sample Gyroscope */
-    ret += MPU6050_ReadAllGyro(MPU6050_LOW, &dataimu.gyro);
+    gyro_t gyro;
+    ret += MPU6050_ReadAllGyro(MPU6050_LOW, &gyro);
 
     /* Check if the data was successful sample */
     if (ret == 0)
     {
+        /* Store IMU Data */
+        dataIMU_t dataimu = {.ms = time_ms, .accel = accel, .gyro = gyro};
+        /* Send IMU data via queue */
         if (xQueueSend(xQueueIMU, (void *)&dataimu, (500/portTICK_RATE_MS)) != pdTRUE)
         {
             ERROR("Full queue!");
