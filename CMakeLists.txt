@@ -16,13 +16,6 @@ include_directories("${PROJECT_SOURCE_DIR}/include")
 # Create the binary
 add_executable(${PROJECT_NAME} ${src_files})
 
-# Add Tiva libraries
-message(STATUS "${TIVAWARE_PATH}")
-target_link_libraries(${PROJECT_NAME}
-    ${TIVAWARE_PATH}/usblib/gcc/libusb.a
-    ${TIVAWARE_PATH}/driverlib/gcc/libdriver.a
-)
-
 # Add FreeRTOS library
 add_subdirectory(thirdparty/freertos ./build_freertos)
 # Add RGB library
