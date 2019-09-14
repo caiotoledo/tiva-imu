@@ -26,7 +26,9 @@ typedef struct
 } dataIMU_t;
 
 extern uint32_t GetMillis(void);
+
 static inline void vDouble2IntFrac(double input, int *integer, uint32_t *fraction, uint8_t precision);
+static void vIMULogTask(void *pvParameters);
 
 void vMPU6050Task(TimerHandle_t xTimer)
 {
@@ -88,7 +90,7 @@ void vMPU6050Task(TimerHandle_t xTimer)
     }
 }
 
-void vIMULogTask(void *pvParameters)
+static void vIMULogTask(void *pvParameters)
 {
     QueueHandle_t xQueueDataIMU = *((QueueHandle_t *)pvParameters);
 
