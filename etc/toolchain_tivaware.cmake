@@ -34,6 +34,3 @@ set(CMAKE_EXE_LINKER_FLAGS "-T${PROJECT_SOURCE_DIR}/etc/${LD_SCRIPT} -specs=${PR
 
 # add GCC specific definitions
 add_definitions(-Dgcc)
-
-set(TIVAWARE_PATH "/home/caio/Embedded/tivaware")
-include_directories("${TIVAWARE_PATH}")

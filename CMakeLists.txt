@@ -12,6 +12,11 @@ file(GLOB_RECURSE src_files "${src_dir}/*.c")
 set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O0")
 
 include_directories("${PROJECT_SOURCE_DIR}/include")
+# Include tivaware folder from Texas Instruments
+if ("${TIVAWARE_PATH}" STREQUAL "")
+    message(FATAL_ERROR "TIVAWARE_PATH variable not set!")
+endif()
+include_directories("${TIVAWARE_PATH}")
 
 # Create the binary
 add_executable(${PROJECT_NAME} ${src_files})
