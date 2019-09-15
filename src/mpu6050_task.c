@@ -112,8 +112,10 @@ static void vMPU6050Task(TimerHandle_t xTimer)
     {
         /* Store IMU Data */
         dataIMU_t dataimu = {.ms = time_ms, .accel = accel, .gyro = gyro};
+        /* Wait for half of the period of the timer to the queue be available */
+        TickType_t xTimerPeriod = xTimerGetPeriod(xTimer)/2;
         /* Send IMU data via queue */
-        if (xQueueSend(taskParam.queue, (void *)&dataimu, (500/portTICK_RATE_MS)) != pdTRUE)
+        if (xQueueSend(taskParam.queue, (void *)&dataimu, xTimerPeriod) != pdTRUE)
         {
             ERROR("Full queue!");
         }
