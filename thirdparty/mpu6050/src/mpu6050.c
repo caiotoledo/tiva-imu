@@ -194,7 +194,7 @@ int MPU6050_ReadAllAccel(eMPU6050_BASE mpu,  accel_t *accel)
     GET_CONF(mpu_conf, mpu, end_mpu6050_readaccel);
 
     /* Get Raw Acceleration values */
-    uint8_t val[8] = { 0 };
+    uint8_t val[6] = { 0 };
     int ret_read = I2C_Read_Multiple_Reg(mpu_conf->conf.i2c, mpu_conf->addr, MPU6050_ACCEL_XOUT_H, sizeof(val), val);
     if (ret_read != sizeof(val))
     {
@@ -231,7 +231,7 @@ int MPU6050_ReadAllGyro(eMPU6050_BASE mpu, gyro_t *gyro)
     GET_CONF(mpu_conf, mpu, end_mpu6050_readgyro);
 
     /* Get Raw Acceleration values */
-    uint8_t val[8] = {0};
+    uint8_t val[6] = {0};
     int ret_read = I2C_Read_Multiple_Reg(mpu_conf->conf.i2c, mpu_conf->addr, MPU6050_GYRO_XOUT_H, sizeof(val), val);
     if (ret_read != sizeof(val))
     {
