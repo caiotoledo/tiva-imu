@@ -156,6 +156,14 @@ int MPU6050_Enable(eMPU6050_BASE mpu, eI2C_BASE i2c, uint32_t (*func)())
     for (size_t i = 0; registers_map[i].AddrReg != INVALID_ADDR; i++)
     {
         I2C_Send(mpu_conf->conf.i2c, mpu_conf->addr, registers_map[i].AddrReg, 1, registers_map[i].val);
+
+        /* Power management requires a delay */
+        if (registers_map[i].AddrReg == MPU6050_PWR_MGMT_1)
+        {
+            /* Wait 100 ms for IMU initialization */
+            uint32_t start = ms_func();
+            while ( (ms_func() - start) <= 100 );
+        }
     }
 
     ret = 0;
