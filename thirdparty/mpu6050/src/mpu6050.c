@@ -58,7 +58,7 @@ typedef enum
 typedef struct
 {
     tMPU6050_Addr_Reg   AddrReg;
-    uint32_t            val;
+    uint8_t             val;
 } tMPU6050_Addr_Map;
 
 typedef struct
