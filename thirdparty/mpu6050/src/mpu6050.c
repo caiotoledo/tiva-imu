@@ -81,6 +81,7 @@ inline static tMPU6050_Conf *GetMPU6050Conf(eMPU6050_BASE mpu);
 
 static tMPU6050_Addr_Map reg_configuration[] =
 {
+    { .AddrReg = MPU6050_PWR_MGMT_1,    .val = 0x80, }, /* Reset IMU Registers */
     { .AddrReg = MPU6050_SMPLRT_DIV,    .val = 0x00, },
     { .AddrReg = MPU6050_CONFIG,        .val = 0x00, },
     { .AddrReg = MPU6050_GYRO_CONFIG,   .val = 0x00, },
