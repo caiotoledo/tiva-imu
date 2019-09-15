@@ -80,8 +80,7 @@ int main()
         vFaultFunc();
     }
 
-    TimerHandle_t xTimerMPU6050 = xTimerCreate("MPU6050 Timer", TASK_MPU6050_PERIOD, pdTRUE, NULL, vMPU6050Task);
-    if ( (xTimerMPU6050 == NULL) || (xTimerStart(xTimerMPU6050, 0) != pdPASS) )
+    if (xTaskCreate(vIMUTask, "IMU Task", TASK_IMU_STACKSIZE, NULL, TASK_IMU_PRIORITY, NULL) != pdPASS)
     {
         vFaultFunc();
     }

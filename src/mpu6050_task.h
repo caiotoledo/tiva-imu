@@ -2,10 +2,10 @@
 #define MPU6050_TASK_H_
 
 /**
- * @brief Task to interact with IMU MPU6050
- * 
- * @param xTimer FreeRTOS Timer Handler
+ * @brief Initialize and sample the data from IMU
+ *
+ * @param pvParameters Not used, should be NULL
  */
-void vMPU6050Task(TimerHandle_t xTimer);
+void vIMUTask(void *pvParameters);
 
 #endif /* MPU6050_TASK_H_ */
