@@ -99,14 +99,26 @@ static void vMPU6050Task(TimerHandle_t xTimer)
 
     imuTaskConfig_t taskParam = *(( imuTaskConfig_t * ) pvTimerGetTimerID( xTimer ));
 
+    /* Initialize the Mutex for this task only once */
+    static SemaphoreHandle_t mtxIMU = NULL;
+    if (mtxIMU == NULL)
+    {
+        mtxIMU = xSemaphoreCreateMutex();
+    }
+
     /* Store sample time in ms */
     uint32_t time_ms = GetMillis();
+
+    /* Lock IMU mutex */
+    xSemaphoreTake(mtxIMU, portMAX_DELAY);
     /* Sample Accelerometer */
     accel_t accel;
     ret += MPU6050_ReadAllAccel(taskParam.mpu, &accel);
     /* Sample Gyroscope */
     gyro_t gyro;
     ret += MPU6050_ReadAllGyro(taskParam.mpu, &gyro);
+    /* Release IMU mutex */
+    xSemaphoreGive(mtxIMU);
 
     /* Check if the data was successful sample */
     if (ret == 0)
@@ -147,7 +159,7 @@ static void vIMULogTask(void *pvParameters)
             int integer[3];
             uint32_t frac[3];
 
-            /* Lock mutex */
+            /* Lock LOG mutex */
             xSemaphoreTake(mtxLog, portMAX_DELAY);
 
             INFO("TIME %d ms", data.ms);
@@ -164,7 +176,7 @@ static void vIMULogTask(void *pvParameters)
             vDouble2IntFrac(data.gyro.z, &integer[2], &frac[2], 4U);
             INFO("[Gyro] X[%d.%04u] Y[%d.%04u] Z[%d.%04u]", integer[0], frac[0], integer[1], frac[1], integer[2], frac[2]);
 
-            /* Release mutex */
+            /* Release LOG mutex */
             xSemaphoreGive(mtxLog);
         }
     }
