@@ -22,6 +22,7 @@
 
 typedef struct
 {
+    char *imu;
     uint32_t ms;
     accel_t accel;
     gyro_t gyro;
@@ -32,7 +33,6 @@ typedef struct
     char *name;
     eMPU6050_BASE mpu;
     eI2C_BASE i2c;
-    QueueHandle_t queue;
 } imuTaskConfig_t;
 
 extern uint32_t GetMillis(void);
@@ -43,26 +43,39 @@ static void vIMULogTask(void *pvParameters);
 
 static imuTaskConfig_t taskConfig[] =
 {
-    { .name = "MPU6050 Low",    .mpu = MPU6050_LOW,     .i2c= I2C1, .queue = NULL},
-    { .name = "MPU6050 High",   .mpu = MPU6050_HIGH,    .i2c= I2C1, .queue = NULL},
+    { .name = "MPU6050 Low",    .mpu = MPU6050_LOW,     .i2c= I2C1},
+    { .name = "MPU6050 High",   .mpu = MPU6050_HIGH,    .i2c= I2C1},
 };
+
+/* Queue for communication between vMPU6050Task and vIMULogTask */
+static QueueHandle_t xIMUQueue;
 
 void vIMUTask(void *pvParameters)
 {
+    /* INITIALIZE IMU DATA QUEUE */
+    xIMUQueue = xQueueCreate(QUEUE_IMU_LENGTH, sizeof(dataIMU_t));
+    if (xIMUQueue == NULL)
+    {
+        ERROR("Create Queue IMU data error!");
+        /* Do not go further if the queue couldn't be created */
+        goto end_imu_task;
+    }
+    INFO("Queue for IMU Data created!");
+
+    /* CREATE IMU LOG TASK */
+    /* IMU Data Queue as parameter */
+    if (xTaskCreate(vIMULogTask, "IMU Log Task", TASK_IMULOG_STACKSIZE, &xIMUQueue, TASK_IMULOG_PRIORITY, NULL) != pdPASS)
+    {
+        ERROR("IMU Log Task Create Error!");
+        /* Do not go further if the log task couldn't be created */
+        goto end_imu_task;
+    }
+    INFO("Task IMU Log created!");
+
     for (size_t i = 0; i < sizeof(taskConfig)/sizeof(taskConfig[0]); i++)
     {
         if (MPU6050_Enable(taskConfig[i].mpu, taskConfig[i].i2c, GetMillis) == 0)
         {
-            /* INITIALIZE IMU DATA QUEUE */
-            taskConfig[i].queue = xQueueCreate(QUEUE_IMU_LENGTH, sizeof(dataIMU_t));
-            if (taskConfig[i].queue == NULL)
-            {
-                ERROR("Create Queue IMU data error!");
-                /* Do not go further if the queue couldn't be created */
-                continue;
-            }
-            INFO("Queue for IMU Data of [%s] created!", taskConfig[i].name);
-
             /* START IMU SAMPLE TIMER */
             TimerHandle_t xTimerMPU6050 = xTimerCreate("MPU6050 Timer", TASK_MPU6050_PERIOD, pdTRUE, (void *) &taskConfig[i], vMPU6050Task);
             if ( (xTimerMPU6050 == NULL) || (xTimerStart(xTimerMPU6050, 0) != pdPASS) )
@@ -72,16 +85,6 @@ void vIMUTask(void *pvParameters)
                 continue;
             }
             INFO("Timer [%s] created!", taskConfig[i].name);
-
-            /* CREATE IMU LOG TASK */
-            /* IMU Data Queue as parameter */
-            if (xTaskCreate(vIMULogTask, "IMU Log Task", TASK_IMULOG_STACKSIZE, &taskConfig[i].queue, TASK_IMULOG_PRIORITY, NULL) != pdPASS)
-            {
-                ERROR("IMU Log Task Create Error!");
-                /* Do not go further if the log task couldn't be created */
-                continue;
-            }
-            INFO("Task IMU Log for [%s] created!", taskConfig[i].name);
         }
         else
         {
@@ -89,6 +92,7 @@ void vIMUTask(void *pvParameters)
         }
     }
 
+end_imu_task:
     /* This task can be suspended now */
     vTaskSuspend(NULL);
 }
@@ -124,11 +128,11 @@ static void vMPU6050Task(TimerHandle_t xTimer)
     if (ret == 0)
     {
         /* Store IMU Data */
-        dataIMU_t dataimu = {.ms = time_ms, .accel = accel, .gyro = gyro};
+        dataIMU_t dataimu = {.imu = taskParam.name, .ms = time_ms, .accel = accel, .gyro = gyro};
         /* Wait for half of the period of the timer to the queue be available */
         TickType_t xTimerPeriod = xTimerGetPeriod(xTimer)/2;
         /* Send IMU data via queue */
-        if (xQueueSend(taskParam.queue, (void *)&dataimu, xTimerPeriod) != pdTRUE)
+        if (xQueueSend(xIMUQueue, (void *)&dataimu, xTimerPeriod) != pdTRUE)
         {
             ERROR("Full queue!");
         }
@@ -143,13 +147,6 @@ static void vIMULogTask(void *pvParameters)
 {
     QueueHandle_t xQueueDataIMU = *((QueueHandle_t *)pvParameters);
 
-    /* Initialize the Mutex for this task only once */
-    static SemaphoreHandle_t mtxLog = NULL;
-    if (mtxLog == NULL)
-    {
-        mtxLog = xSemaphoreCreateMutex();
-    }
-
     for(;;)
     {
         dataIMU_t data;
@@ -159,10 +156,7 @@ static void vIMULogTask(void *pvParameters)
             int integer[3];
             uint32_t frac[3];
 
-            /* Lock LOG mutex */
-            xSemaphoreTake(mtxLog, portMAX_DELAY);
-
-            INFO("TIME %d ms", data.ms);
+            INFO("[%s] TIME %d ms", data.imu, data.ms);
 
             /* Convert Accel Double values for print */
             vDouble2IntFrac(data.accel.x, &integer[0], &frac[0], 4U);
@@ -175,9 +169,6 @@ static void vIMULogTask(void *pvParameters)
             vDouble2IntFrac(data.gyro.y, &integer[1], &frac[1], 4U);
             vDouble2IntFrac(data.gyro.z, &integer[2], &frac[2], 4U);
             INFO("[Gyro] X[%d.%04u] Y[%d.%04u] Z[%d.%04u]", integer[0], frac[0], integer[1], frac[1], integer[2], frac[2]);
-
-            /* Release LOG mutex */
-            xSemaphoreGive(mtxLog);
         }
     }
 }
