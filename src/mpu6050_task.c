@@ -10,6 +10,7 @@
 #include <task.h>
 #include <queue.h>
 #include <timers.h>
+#include <semphr.h>
 
 #include <tasks_config.h>
 #include "mpu6050_task.h"
@@ -130,6 +131,13 @@ static void vIMULogTask(void *pvParameters)
 {
     QueueHandle_t xQueueDataIMU = *((QueueHandle_t *)pvParameters);
 
+    /* Initialize the Mutex for this task only once */
+    static SemaphoreHandle_t mtxLog = NULL;
+    if (mtxLog == NULL)
+    {
+        mtxLog = xSemaphoreCreateMutex();
+    }
+
     for(;;)
     {
         dataIMU_t data;
@@ -138,6 +146,9 @@ static void vIMULogTask(void *pvParameters)
         {
             int integer[3];
             uint32_t frac[3];
+
+            /* Lock mutex */
+            xSemaphoreTake(mtxLog, portMAX_DELAY);
 
             INFO("TIME %d ms", data.ms);
 
@@ -152,6 +163,9 @@ static void vIMULogTask(void *pvParameters)
             vDouble2IntFrac(data.gyro.y, &integer[1], &frac[1], 4U);
             vDouble2IntFrac(data.gyro.z, &integer[2], &frac[2], 4U);
             INFO("[Gyro] X[%d.%04u] Y[%d.%04u] Z[%d.%04u]", integer[0], frac[0], integer[1], frac[1], integer[2], frac[2]);
+
+            /* Release mutex */
+            xSemaphoreGive(mtxLog);
         }
     }
 }
