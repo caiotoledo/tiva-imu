@@ -1,0 +1,22 @@
+language: c
+compiler: gcc
+os: linux
+
+addons:
+  apt:
+    packages:
+      - gcc-arm-none-eabi
+
+before_script:
+  - cmake --version
+  - arm-none-eabi-gcc --version
+
+script:
+  # Download tivaware library
+  - git clone https://github.com/yuvadm/tiva-c.git
+  # Run cmake
+  - cmake -DCMAKE_TOOLCHAIN_FILE=./etc/toolchain_tivaware.cmake -DTIVAWARE_PATH=$(realpath ./tiva-c) .
+  - cmake -DCMAKE_TOOLCHAIN_FILE=./etc/toolchain_tivaware.cmake -DTIVAWARE_PATH=$(realpath ./tiva-c) .
+  # build project
+  # FIXME: Make command not working because of issues in arm-none-eabi-gcc version
+  # - make
