@@ -59,4 +59,13 @@ int MPU6050_ReadAllAccel(eMPU6050_BASE mpu,  accel_t *accel);
  */
 int MPU6050_ReadAllGyro(eMPU6050_BASE mpu,  gyro_t *gyro);
 
+/**
+ * @brief Return ambient temperature in Celsius
+ * 
+ * @param mpu MPU Interface (see #eMPU6050_BASE)
+ * @param temperature Pointer to output value
+ * @return int Return 0 if successful
+ */
+int MPU6050_ReadTemperature(eMPU6050_BASE mpu, double *temperature);
+
 #endif /* MPU6050_H_ */

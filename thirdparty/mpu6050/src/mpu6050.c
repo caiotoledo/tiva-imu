@@ -10,6 +10,8 @@
 
 #define CONST_ACCEL                 (16.384)
 #define CONST_GYRO                  (131)
+#define CONST_TEMP                  (340)
+#define OFFSET_TEMP                 (36.53F)
 
 #define DEFAULT_I2C_INTERFACE       (I2C0)
 
@@ -265,6 +267,37 @@ int MPU6050_ReadAllGyro(eMPU6050_BASE mpu, gyro_t *gyro)
     ret = 0;
 
 end_mpu6050_readgyro:
+    return ret;
+}
+
+int MPU6050_ReadTemperature(eMPU6050_BASE mpu, double *temperature)
+{
+    int ret = -1;
+
+    /* Get MPU configuration */
+    tMPU6050_Conf *mpu_conf;
+    GET_CONF(mpu_conf, mpu, end_mpu6050_readtemp);
+
+    /* Get Raw Temperature values */
+    uint8_t val[2] = {0};
+    int ret_read = I2C_Read_Multiple_Reg(mpu_conf->conf.i2c, mpu_conf->addr, MPU6050_TEMP_OUT_H, sizeof(val), val);
+    if (ret_read != sizeof(val))
+    {
+        ERROR("Read temperature registers failed");
+        goto end_mpu6050_readtemp;
+    }
+
+    /* Temperature Conversion */
+    int16_t raw_temp = (int16_t)((val[0] << 8) | val[1]);
+    double output_temp = ((double)raw_temp)/CONST_TEMP;
+    output_temp += OFFSET_TEMP;
+
+    /* Store in the output buffer */
+    *temperature = output_temp;
+
+    ret = 0;
+
+end_mpu6050_readtemp:
     return ret;
 }
 
