@@ -26,6 +26,7 @@ typedef struct
     uint32_t ms;
     accel_t accel;
     gyro_t gyro;
+    double temperature;
 } dataIMU_t;
 
 typedef struct
@@ -121,6 +122,9 @@ static void vMPU6050Task(TimerHandle_t xTimer)
     /* Sample Gyroscope */
     gyro_t gyro;
     ret += MPU6050_ReadAllGyro(taskParam.mpu, &gyro);
+    /* Sample Temperature */
+    double temp;
+    ret += MPU6050_ReadTemperature(taskParam.mpu, &temp);
     /* Release IMU mutex */
     xSemaphoreGive(mtxIMU);
 
@@ -128,7 +132,13 @@ static void vMPU6050Task(TimerHandle_t xTimer)
     if (ret == 0)
     {
         /* Store IMU Data */
-        dataIMU_t dataimu = {.imu = taskParam.name, .ms = time_ms, .accel = accel, .gyro = gyro};
+        dataIMU_t dataimu = {
+            .imu = taskParam.name,
+            .ms = time_ms,
+            .accel = accel,
+            .gyro = gyro,
+            .temperature = temp,
+        };
         /* Wait for half of the period of the timer to the queue be available */
         TickType_t xTimerPeriod = xTimerGetPeriod(xTimer)/2;
         /* Send IMU data via queue */
@@ -169,6 +179,10 @@ static void vIMULogTask(void *pvParameters)
             vDouble2IntFrac(data.gyro.y, &integer[1], &frac[1], 4U);
             vDouble2IntFrac(data.gyro.z, &integer[2], &frac[2], 4U);
             INFO("[Gyro] X[%d.%04u] Y[%d.%04u] Z[%d.%04u]", integer[0], frac[0], integer[1], frac[1], integer[2], frac[2]);
+
+            /* Convert Temperature Double values for print */
+            vDouble2IntFrac(data.temperature, &integer[0], &frac[0], 4U);
+            INFO("[Temperature] [%d.%04u]", integer[0], frac[0]);
         }
     }
 }
