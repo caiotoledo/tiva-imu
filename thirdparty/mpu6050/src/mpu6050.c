@@ -239,7 +239,7 @@ int MPU6050_ReadAllGyro(eMPU6050_BASE mpu, gyro_t *gyro)
     tMPU6050_Conf *mpu_conf;
     GET_CONF(mpu_conf, mpu, end_mpu6050_readgyro);
 
-    /* Get Raw Acceleration values */
+    /* Get Raw Gyroscope values */
     uint8_t val[6] = {0};
     int ret_read = I2C_Read_Multiple_Reg(mpu_conf->conf.i2c, mpu_conf->addr, MPU6050_GYRO_XOUT_H, sizeof(val), val);
     if (ret_read != sizeof(val))
@@ -248,7 +248,7 @@ int MPU6050_ReadAllGyro(eMPU6050_BASE mpu, gyro_t *gyro)
         goto end_mpu6050_readgyro;
     }
 
-    /* Acceleration Conversion */
+    /* Gyroscope Conversion */
     double output_gyro[3] = {0};
     for (size_t i = 0; i < sizeof(val); i += 2)
     {
