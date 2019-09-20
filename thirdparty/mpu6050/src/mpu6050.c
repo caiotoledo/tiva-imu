@@ -200,6 +200,12 @@ int MPU6050_ReadAllAccel(eMPU6050_BASE mpu,  accel_t *accel)
 {
     int ret = -1;
 
+    /* Pointer protection */
+    if (accel == NULL)
+    {
+        goto end_mpu6050_readaccel;
+    }
+
     /* Get MPU configuration */
     tMPU6050_Conf *mpu_conf;
     GET_CONF(mpu_conf, mpu, end_mpu6050_readaccel);
@@ -237,6 +243,12 @@ int MPU6050_ReadAllGyro(eMPU6050_BASE mpu, gyro_t *gyro)
 {
     int ret = -1;
 
+    /* Pointer protection */
+    if (gyro == NULL)
+    {
+        goto end_mpu6050_readgyro;
+    }
+
     /* Get MPU configuration */
     tMPU6050_Conf *mpu_conf;
     GET_CONF(mpu_conf, mpu, end_mpu6050_readgyro);
@@ -273,6 +285,12 @@ end_mpu6050_readgyro:
 int MPU6050_ReadTemperature(eMPU6050_BASE mpu, double *temperature)
 {
     int ret = -1;
+
+    /* Pointer protection */
+    if (temperature == NULL)
+    {
+        goto end_mpu6050_readtemp;
+    }
 
     /* Get MPU configuration */
     tMPU6050_Conf *mpu_conf;
