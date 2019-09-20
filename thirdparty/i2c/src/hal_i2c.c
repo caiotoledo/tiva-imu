@@ -70,7 +70,36 @@ static const tI2C_Conf i2c_configurations[] =
             .GPIOPinSDA =       GPIO_PIN_7,
         },
     },
+    {
+        .i2c = I2C2,
+        .conf =
+        {
+            .I2CPeripheral =    SYSCTL_PERIPH_I2C2,
+            .I2CBase =          I2C2_BASE,
+            .GPIOPeripheral =   SYSCTL_PERIPH_GPIOE,
+            .GPIOPortBase =     GPIO_PORTE_BASE,
+            .GPIOPinConfSCL =   GPIO_PE4_I2C2SCL,
+            .GPIOPinConfSDA =   GPIO_PE5_I2C2SDA,
+            .GPIOPinSCL =       GPIO_PIN_4,
+            .GPIOPinSDA =       GPIO_PIN_5,
+        },
+    },
+    {
+        .i2c = I2C3,
+        .conf =
+        {
+            .I2CPeripheral =    SYSCTL_PERIPH_I2C3,
+            .I2CBase =          I2C3_BASE,
+            .GPIOPeripheral =   SYSCTL_PERIPH_GPIOD,
+            .GPIOPortBase =     GPIO_PORTD_BASE,
+            .GPIOPinConfSCL =   GPIO_PD0_I2C3SCL,
+            .GPIOPinConfSDA =   GPIO_PD1_I2C3SDA,
+            .GPIOPinSCL =       GPIO_PIN_0,
+            .GPIOPinSDA =       GPIO_PIN_1,
+        },
+    },
 };
+
 typedef uint32_t (*millis)();
 static millis ms_func;
 
