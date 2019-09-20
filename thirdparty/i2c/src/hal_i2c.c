@@ -45,16 +45,30 @@ static const tI2C_Conf i2c_configurations[] =
     {
         .i2c = I2C1,
         .conf =
-            {
-                .I2CPeripheral =    SYSCTL_PERIPH_I2C1,
-                .I2CBase =          I2C1_BASE,
-                .GPIOPeripheral =   SYSCTL_PERIPH_GPIOA,
-                .GPIOPortBase =     GPIO_PORTA_BASE,
-                .GPIOPinConfSCL =   GPIO_PA6_I2C1SCL,
-                .GPIOPinConfSDA =   GPIO_PA7_I2C1SDA,
-                .GPIOPinSCL =       GPIO_PIN_6,
-                .GPIOPinSDA =       GPIO_PIN_7,
-            },
+        {
+            .I2CPeripheral =    SYSCTL_PERIPH_I2C1,
+            .I2CBase =          I2C1_BASE,
+            .GPIOPeripheral =   SYSCTL_PERIPH_GPIOA,
+            .GPIOPortBase =     GPIO_PORTA_BASE,
+            .GPIOPinConfSCL =   GPIO_PA6_I2C1SCL,
+            .GPIOPinConfSDA =   GPIO_PA7_I2C1SDA,
+            .GPIOPinSCL =       GPIO_PIN_6,
+            .GPIOPinSDA =       GPIO_PIN_7,
+        },
+    },
+    {
+        .i2c = I2C0,
+        .conf =
+        {
+            .I2CPeripheral =    SYSCTL_PERIPH_I2C0,
+            .I2CBase =          I2C0_BASE,
+            .GPIOPeripheral =   SYSCTL_PERIPH_GPIOB,
+            .GPIOPortBase =     GPIO_PORTB_BASE,
+            .GPIOPinConfSCL =   GPIO_PB2_I2C0SCL,
+            .GPIOPinConfSDA =   GPIO_PB3_I2C0SDA,
+            .GPIOPinSCL =       GPIO_PIN_2,
+            .GPIOPinSDA =       GPIO_PIN_3,
+        },
     },
 };
 typedef uint32_t (*millis)();
