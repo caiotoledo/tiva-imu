@@ -34,6 +34,7 @@ typedef struct
     char *name;
     eMPU6050_BASE mpu;
     eI2C_BASE i2c;
+    QueueHandle_t queue;
 } imuTaskConfig_t;
 
 extern uint32_t GetMillis(void);
@@ -44,17 +45,14 @@ static void vIMULogTask(void *pvParameters);
 
 static imuTaskConfig_t taskConfig[] =
 {
-    { .name = "MPU6050 Low",    .mpu = MPU6050_LOW,     .i2c= I2C1},
-    { .name = "MPU6050 High",   .mpu = MPU6050_HIGH,    .i2c= I2C1},
+    { .name = "MPU6050 Low",    .mpu = MPU6050_LOW,     .i2c= I2C1, .queue = NULL},
+    { .name = "MPU6050 High",   .mpu = MPU6050_HIGH,    .i2c= I2C1, .queue = NULL},
 };
-
-/* Queue for communication between vMPU6050Task and vIMULogTask */
-static QueueHandle_t xIMUQueue;
 
 void vIMUTask(void *pvParameters)
 {
     /* INITIALIZE IMU DATA QUEUE */
-    xIMUQueue = xQueueCreate(QUEUE_IMU_LENGTH, sizeof(dataIMU_t));
+    QueueHandle_t xIMUQueue = xQueueCreate(QUEUE_IMU_LENGTH, sizeof(dataIMU_t));
     if (xIMUQueue == NULL)
     {
         ERROR("Create Queue IMU data error!");
@@ -75,6 +73,8 @@ void vIMUTask(void *pvParameters)
 
     for (size_t i = 0; i < sizeof(taskConfig)/sizeof(taskConfig[0]); i++)
     {
+        /* Store the Queue Handler in task configuration */
+        taskConfig[i].queue = xIMUQueue;
         if (MPU6050_Enable(taskConfig[i].mpu, taskConfig[i].i2c, GetMillis) == 0)
         {
             /* START IMU SAMPLE TIMER */
@@ -142,7 +142,7 @@ static void vMPU6050Task(TimerHandle_t xTimer)
         /* Wait for half of the period of the timer to the queue be available */
         TickType_t xTimerPeriod = xTimerGetPeriod(xTimer)/2;
         /* Send IMU data via queue */
-        if (xQueueSend(xIMUQueue, (void *)&dataimu, xTimerPeriod) != pdTRUE)
+        if (xQueueSend(taskParam.queue, (void *)&dataimu, xTimerPeriod) != pdTRUE)
         {
             ERROR("Full queue!");
         }
