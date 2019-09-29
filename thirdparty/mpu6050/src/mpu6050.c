@@ -3,7 +3,6 @@
 #include <stdint.h>
 
 #include <log.h>
-#include <hal_i2c.h>
 #include <mpu6050.h>
 
 #define INVALID_ADDR                (0xFF)
