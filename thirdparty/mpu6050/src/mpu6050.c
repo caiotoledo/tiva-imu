@@ -123,11 +123,13 @@ int MPU6050_Enable(eMPU6050_BASE mpu, eI2C_BASE i2c, uint32_t (*func)())
 {
     int ret = -1;
 
-    /* Store milliseconds function: */
-    if (func != 0U)
+    /* Check valid function pointer */
+    if (func == NULL)
     {
-        ms_func = func;
+        goto end_mpu6050_enable;
     }
+    /* Store milliseconds function: */
+    ms_func = func;
 
     tMPU6050_Conf *mpu_conf;
     GET_CONF(mpu_conf, mpu, end_mpu6050_enable);

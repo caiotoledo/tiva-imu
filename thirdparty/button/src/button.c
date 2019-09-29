@@ -82,11 +82,13 @@ static millis ms_func;
 */
 void Button_Enable(uint32_t (*func)())
 {
-    /* Store milliseconds function: */
-    if (func != 0U)
+    /* Check valid function pointer */
+    if (func == NULL)
     {
-        ms_func = func;
+        return;
     }
+    /* Store milliseconds function: */
+    ms_func = func;
 
     SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOF);
 
