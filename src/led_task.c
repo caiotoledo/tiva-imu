@@ -108,6 +108,11 @@ static bool ApplyRGBStep(uint16_t *color, uint32_t step, bool add)
     return bIncrementStateMach;
 }
 
+/**
+ * @brief Run the state machine for the rainbow RGB Led
+ *
+ * @param rgbStep RGB step for each iteration
+ */
 static void vStateMachineRainbowRGB(uint32_t rgbStep)
 {
 

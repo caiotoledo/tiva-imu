@@ -98,6 +98,11 @@ end_imu_task:
     vTaskSuspend(NULL);
 }
 
+/**
+ * @brief Task to sample MPU6050 IMU
+ *
+ * @param xTimer Handler to provide #imuTaskConfig_t configuration
+ */
 static void vMPU6050Task(TimerHandle_t xTimer)
 {
     int ret = 0;
@@ -153,6 +158,11 @@ static void vMPU6050Task(TimerHandle_t xTimer)
     }
 }
 
+/**
+ * @brief IMU Log Task
+ *
+ * @param pvParameters Receive Queue Handler (#QueueHandle_t) to receive data (#dataIMU_t)
+ */
 static void vIMULogTask(void *pvParameters)
 {
     QueueHandle_t xQueueDataIMU = *((QueueHandle_t *)pvParameters);
@@ -187,6 +197,14 @@ static void vIMULogTask(void *pvParameters)
     }
 }
 
+/**
+ * @brief Convert Double values in Integer and Decimal values
+ *
+ * @param input Double value to be converted
+ * @param integer Integer part of the input
+ * @param fraction Decimal part of the input
+ * @param precision Precision of the decimal fraction output
+ */
 static inline void vDouble2IntFrac(double input, int *integer, uint32_t *fraction, uint8_t precision)
 {
     /* Extract signal */
