@@ -35,7 +35,13 @@ add_subdirectory(thirdparty/button ./build_button)
 add_subdirectory(thirdparty/uart ./build_uart)
 
 # Link all libraries
-target_link_libraries(${PROJECT_NAME} freertos rgb mpu6050 button uart)
+target_link_libraries(${PROJECT_NAME}
+    freertos
+    rgb
+    mpu6050
+    button
+    uart
+)
 
 # define objcopy macro
 macro(OBJCOPY_FILE EXE_NAME)
