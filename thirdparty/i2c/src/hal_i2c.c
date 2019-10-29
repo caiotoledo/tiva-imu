@@ -17,7 +17,7 @@
 
 #include <hal_i2c.h>
 
-#define I2C_TIMEOUT_MS      200
+#define I2C_TIMEOUT_MS      (200U)
 
 typedef struct
 {

@@ -19,7 +19,7 @@
 
 #include "LED_RGB.h"
 
-#define PWM_PERIOD		(64000)
+#define PWM_PERIOD		(64000U)
 
 typedef struct
 {

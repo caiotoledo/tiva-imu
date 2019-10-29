@@ -11,10 +11,10 @@
 
 #include <hal_uart.h>
 
-#define RGB_RAINBOW_STEP_MAX            500
-#define RGB_RAINBOW_STEP_MIN            0
+#define RGB_RAINBOW_STEP_MAX            (500U)
+#define RGB_RAINBOW_STEP_MIN            (0U)
 #define RGB_RAINBOW_STEP_INITIAL        RGB_RAINBOW_STEP_MIN
-#define RGB_RAINBOW_STEP_INCREMENT      25
+#define RGB_RAINBOW_STEP_INCREMENT      (25U)
 
 extern uint32_t GetMillis(void);
 

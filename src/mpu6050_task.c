@@ -16,9 +16,9 @@
 #include "mpu6050_task.h"
 
 /* Size of Queue IMU for data logging */
-#define QUEUE_IMU_LENGTH    10
+#define QUEUE_IMU_LENGTH    (10U)
 
-#define ABS(x)      x < 0 ? (-x) : (x)
+#define ABS(x)      (x < 0 ? (-x) : (x))
 
 typedef struct
 {
