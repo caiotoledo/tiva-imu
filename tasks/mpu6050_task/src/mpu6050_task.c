@@ -12,6 +12,8 @@
 #include <timers.h>
 #include <semphr.h>
 
+#include <timer.h>
+
 #include <tasks_config.h>
 #include "mpu6050_task.h"
 
@@ -36,8 +38,6 @@ typedef struct
     eI2C_BASE i2c;
     QueueHandle_t queue;
 } imuTaskConfig_t;
-
-extern uint32_t GetMillis(void);
 
 static inline void vDouble2IntFrac(double input, int *integer, uint32_t *fraction, uint8_t precision);
 static void vMPU6050Task(TimerHandle_t xTimer);

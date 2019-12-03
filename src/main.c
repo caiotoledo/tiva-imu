@@ -33,8 +33,6 @@
 
 #define UNUSED(x)               ((void)x)
 
-uint32_t GetMillis(void);
-
 void vApplicationStackOverflowHook(TaskHandle_t xTask, signed char *pcTaskName)
 {
     UNUSED(pcTaskName);
@@ -54,11 +52,6 @@ static void vFaultFunc(void)
 {
     LED_Set(RED_LED, true);
     while (1);
-}
-
-uint32_t GetMillis(void)
-{
-    return (xTaskGetTickCountFromISR()/portTICK_RATE_MS);
 }
 
 int main()

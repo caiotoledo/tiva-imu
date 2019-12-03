@@ -6,6 +6,8 @@
 #include <LED_RGB.h>
 #include <button.h>
 
+#include <timer.h>
+
 #include <FreeRTOS.h>
 #include <timers.h>
 
@@ -15,8 +17,6 @@
 #define RGB_RAINBOW_STEP_MIN            (0U)
 #define RGB_RAINBOW_STEP_INITIAL        RGB_RAINBOW_STEP_MIN
 #define RGB_RAINBOW_STEP_INCREMENT      (25U)
-
-extern uint32_t GetMillis(void);
 
 static void vStateMachineRainbowRGB(uint32_t rgbStep);
 

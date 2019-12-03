@@ -30,6 +30,14 @@ target_link_libraries(${PROJECT_NAME}
     mpu6050_task
 )
 
+# Add local library:
+add_subdirectory(lib ./build_lib)
+
+# Link all local libraries
+target_link_libraries(${PROJECT_NAME}
+    timer
+)
+
 # Add FreeRTOS library
 add_subdirectory(thirdparty/freertos ./build_freertos)
 # Add RGB library
