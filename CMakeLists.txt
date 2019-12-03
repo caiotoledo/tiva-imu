@@ -21,6 +21,15 @@ include_directories("${TIVAWARE_PATH}")
 # Create the binary
 add_executable(${PROJECT_NAME} ${src_files})
 
+# Add tasks library:
+add_subdirectory(tasks ./build_tasks)
+
+# Link all tasks
+target_link_libraries(${PROJECT_NAME}
+    led_task
+    mpu6050_task
+)
+
 # Add FreeRTOS library
 add_subdirectory(thirdparty/freertos ./build_freertos)
 # Add RGB library

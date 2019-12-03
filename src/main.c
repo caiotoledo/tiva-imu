@@ -26,8 +26,8 @@
 #include <semphr.h>
 
 #include <tasks_config.h>
-#include "led_task.h"
-#include "mpu6050_task.h"
+#include <led_task.h>
+#include <mpu6050_task.h>
 
 #define PROGRAM_NAME            "tiva-imu"
 
