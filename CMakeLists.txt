@@ -22,7 +22,7 @@ include_directories("${TIVAWARE_PATH}")
 add_executable(${PROJECT_NAME} ${src_files})
 
 # Add tasks library:
-add_subdirectory(tasks ./build_tasks)
+add_subdirectory(tasks)
 
 # Link all tasks
 target_link_libraries(${PROJECT_NAME}
@@ -31,7 +31,7 @@ target_link_libraries(${PROJECT_NAME}
 )
 
 # Add local library:
-add_subdirectory(lib ./build_lib)
+add_subdirectory(lib)
 
 # Link all local libraries
 target_link_libraries(${PROJECT_NAME}
@@ -43,7 +43,7 @@ target_link_libraries(${PROJECT_NAME}
 )
 
 # Add FreeRTOS library
-add_subdirectory(thirdparty/freertos ./build_freertos)
+add_subdirectory(thirdparty)
 
 # Link all third party libraries
 target_link_libraries(${PROJECT_NAME}
