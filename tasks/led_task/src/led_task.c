@@ -18,6 +18,8 @@
 #define RGB_RAINBOW_STEP_INITIAL        RGB_RAINBOW_STEP_MIN
 #define RGB_RAINBOW_STEP_INCREMENT      (25U)
 
+#define MIN(a,b)                        ((a > b) ? b : a)
+
 static void vStateMachineRainbowRGB(uint32_t rgbStep);
 
 void vLedTask(void *pvParameters)
@@ -44,10 +46,8 @@ void vLedTask(void *pvParameters)
         if (sw1)
         {
             RGBRainbowStep += RGB_RAINBOW_STEP_INCREMENT;
-            if (RGBRainbowStep > RGB_RAINBOW_STEP_MAX)
-            {
-                RGBRainbowStep = RGB_RAINBOW_STEP_MAX;
-            }
+            /* Do not allow values greater than RGB_RAINBOW_STEP_MAX */
+            RGBRainbowStep = MIN(RGBRainbowStep, RGB_RAINBOW_STEP_MAX);
             INFO("RGBRainbowStep [%u]", RGBRainbowStep);
         }
 
@@ -56,10 +56,8 @@ void vLedTask(void *pvParameters)
         if (sw2)
         {
             RGBRainbowStep -= RGB_RAINBOW_STEP_INCREMENT;
-            if (RGBRainbowStep > RGB_RAINBOW_STEP_MAX)
-            {
-                RGBRainbowStep = RGB_RAINBOW_STEP_MIN;
-            }
+            /* Check variable overflow */
+            RGBRainbowStep = (RGBRainbowStep > RGB_RAINBOW_STEP_MAX) ? RGB_RAINBOW_STEP_MIN : RGBRainbowStep;
             INFO("RGBRainbowStep [%u]", RGBRainbowStep);
 
             /* Notify LED off in logger */
