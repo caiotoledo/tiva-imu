@@ -20,6 +20,11 @@
 
 #define MIN(a,b)                        ((a > b) ? b : a)
 
+typedef enum {
+    INCREMENT,
+    DECREMENT,
+} eStepOperation;
+
 static void vStateMachineRainbowRGB(uint32_t rgbStep);
 
 void vLedTask(void *pvParameters)
@@ -78,10 +83,11 @@ void vLedTask(void *pvParameters)
  * @param color Color pointer
  * @param step Step value for color variable
  * @param add Flag to increment or decrement the color value
+ * @param op Operation increment or decrement in the color value
  * @return true Color variable overflow
  * @return false Color variable didn't overflow
  */
-static bool ApplyRGBStep(uint16_t *color, uint32_t step, bool add)
+static bool ApplyRGBStep(uint16_t *color, uint32_t step, eStepOperation op)
 {
     /* Pointer parameter protection */
     if (color == NULL)
@@ -93,12 +99,12 @@ static bool ApplyRGBStep(uint16_t *color, uint32_t step, bool add)
     bool bIncrementStateMach = false;
 
     /* Update color variable */
-    c += add ? step : (-step);
+    c += (op == INCREMENT) ? step : (-step);
 
     /* Check variable overflow */
     if (c >= RGB_MAX_VALUE)
     {
-        c = add ? RGB_MAX_VALUE : RGB_MIN_VALUE;
+        c = (op == INCREMENT) ? RGB_MAX_VALUE : RGB_MIN_VALUE;
         bIncrementStateMach = true;
     }
 
@@ -125,37 +131,37 @@ static void vStateMachineRainbowRGB(uint32_t rgbStep)
     {
     /* Function ApplyRGBStep return true in variable overflow, so the state should increment */
     case 0:
-        if (ApplyRGBStep(&green, rgbStep, true))
+        if (ApplyRGBStep(&green, rgbStep, INCREMENT))
         {
             state++;
         }
         break;
     case 1:
-        if (ApplyRGBStep(&red, rgbStep, false))
+        if (ApplyRGBStep(&red, rgbStep, DECREMENT))
         {
             state++;
         }
         break;
     case 2:
-        if (ApplyRGBStep(&blue, rgbStep, true))
+        if (ApplyRGBStep(&blue, rgbStep, INCREMENT))
         {
             state++;
         }
         break;
     case 3:
-        if (ApplyRGBStep(&green, rgbStep, false))
+        if (ApplyRGBStep(&green, rgbStep, DECREMENT))
         {
             state++;
         }
         break;
     case 4:
-        if (ApplyRGBStep(&red, rgbStep, true))
+        if (ApplyRGBStep(&red, rgbStep, INCREMENT))
         {
             state++;
         }
         break;
     case 5:
-        if (ApplyRGBStep(&blue, rgbStep, false))
+        if (ApplyRGBStep(&blue, rgbStep, DECREMENT))
         {
             state = 0;
         }
