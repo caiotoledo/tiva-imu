@@ -23,6 +23,7 @@ typedef enum {
     DECREMENT,
 } eStepOperation;
 
+static bool ApplyRGBStep(uint16_t *color, uint32_t step, eStepOperation op);
 static void vStateMachineRainbowRGB(uint32_t rgbStep);
 
 void vLedTask(void *pvParameters)
@@ -73,41 +74,6 @@ void vLedTask(void *pvParameters)
         /* Task sleep */
         vTaskDelay(150 / portTICK_RATE_MS);
     }
-}
-
-/**
- * @brief Apply the RGB Step in color reference
- *
- * @param color Color pointer
- * @param step Step value for color variable
- * @param add Flag to increment or decrement the color value
- * @param op Operation increment or decrement in the color value
- * @return true Color variable overflow
- * @return false Color variable didn't overflow
- */
-static bool ApplyRGBStep(uint16_t *color, uint32_t step, eStepOperation op)
-{
-    /* Pointer parameter protection */
-    if (color == NULL)
-    {
-        return false;
-    }
-
-    uint16_t c = *color;
-    bool bIncrementStateMach = false;
-
-    /* Update color variable */
-    c += (op == INCREMENT) ? step : (-step);
-
-    /* Check variable overflow */
-    if (c >= RGB_MAX_VALUE)
-    {
-        c = (op == INCREMENT) ? RGB_MAX_VALUE : RGB_MIN_VALUE;
-        bIncrementStateMach = true;
-    }
-
-    *color = c;
-    return bIncrementStateMach;
 }
 
 /**
@@ -171,4 +137,39 @@ static void vStateMachineRainbowRGB(uint32_t rgbStep)
 
     /* Update the RGB values */
     RGB_Set(red, green, blue);
+}
+
+/**
+ * @brief Apply the RGB Step in color reference
+ *
+ * @param color Color pointer
+ * @param step Step value for color variable
+ * @param add Flag to increment or decrement the color value
+ * @param op Operation increment or decrement in the color value
+ * @return true Color variable overflow
+ * @return false Color variable didn't overflow
+ */
+static bool ApplyRGBStep(uint16_t *color, uint32_t step, eStepOperation op)
+{
+    /* Pointer parameter protection */
+    if (color == NULL)
+    {
+        return false;
+    }
+
+    uint16_t c = *color;
+    bool bIncrementStateMach = false;
+
+    /* Update color variable */
+    c += (op == INCREMENT) ? step : (-step);
+
+    /* Check variable overflow */
+    if (c >= RGB_MAX_VALUE)
+    {
+        c = (op == INCREMENT) ? RGB_MAX_VALUE : RGB_MIN_VALUE;
+        bIncrementStateMach = true;
+    }
+
+    *color = c;
+    return bIncrementStateMach;
 }
