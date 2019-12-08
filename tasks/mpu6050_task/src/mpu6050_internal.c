@@ -21,11 +21,11 @@ void vMPU6050Task(TimerHandle_t xTimer)
         mtxIMU = xSemaphoreCreateMutex();
     }
 
-    /* Store sample time in ms */
-    uint32_t time_ms = GetMillis();
-
     /* Lock IMU mutex */
     xSemaphoreTake(mtxIMU, portMAX_DELAY);
+
+    /* Store sample time in ms */
+    uint32_t time_ms = GetMillis();
     /* Sample Accelerometer */
     accel_t accel;
     ret += MPU6050_ReadAllAccel(taskParam.mpu, &accel);
@@ -35,6 +35,7 @@ void vMPU6050Task(TimerHandle_t xTimer)
     /* Sample Temperature */
     double temp;
     ret += MPU6050_ReadTemperature(taskParam.mpu, &temp);
+
     /* Release IMU mutex */
     xSemaphoreGive(mtxIMU);
 
