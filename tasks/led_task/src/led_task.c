@@ -11,8 +11,6 @@
 #include <FreeRTOS.h>
 #include <timers.h>
 
-#include <hal_uart.h>
-
 #define RGB_RAINBOW_STEP_MAX            (500U)
 #define RGB_RAINBOW_STEP_MIN            (0U)
 #define RGB_RAINBOW_STEP_INITIAL        RGB_RAINBOW_STEP_MIN
