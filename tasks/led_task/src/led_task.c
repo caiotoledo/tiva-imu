@@ -16,6 +16,8 @@
 #define RGB_RAINBOW_STEP_INITIAL        RGB_RAINBOW_STEP_MIN
 #define RGB_RAINBOW_STEP_INCREMENT      (25U)
 
+#define RGB_TASK_DELAY                  (150/portTICK_RATE_MS)
+
 #define MIN(a,b)                        ((a > b) ? b : a)
 
 typedef enum {
@@ -72,7 +74,7 @@ void vLedTask(void *pvParameters)
         }
 
         /* Task sleep */
-        vTaskDelay(150 / portTICK_RATE_MS);
+        vTaskDelay(RGB_TASK_DELAY);
     }
 }
 
