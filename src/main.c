@@ -17,6 +17,7 @@
 #include <version.h>
 #include <rgb.h>
 #include <hal_uart.h>
+#include <mcu.h>
 #include <log.h>
 
 #include <FreeRTOS.h>
@@ -78,7 +79,11 @@ int main()
         vFaultFunc();
     }
 
+    /* Should never return */
     vTaskStartScheduler();
+
+    /* Reset the system if the scheduler returns */
+    MCU_SoftwareReset();
 
     while (1);
 }

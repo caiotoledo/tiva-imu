@@ -40,6 +40,7 @@ target_link_libraries(${PROJECT_NAME}
     mpu6050
     button
     uart
+    mcu
 )
 
 # Add FreeRTOS library

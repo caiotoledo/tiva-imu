@@ -15,3 +15,6 @@ add_subdirectory(button)
 
 # Add UART library
 add_subdirectory(uart)
+
+# Add MCU library
+add_subdirectory(mcu)
