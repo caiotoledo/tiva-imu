@@ -54,7 +54,7 @@ void LED_Set(LED_RGB led, bool state);
  * @brief Configure the RGB values for each color
  * Values should be between #RGB_MAX_VALUE and #RGB_MIN_VALUE
  * 
- * @param rValue Set RED Color
+ * @param rValue Set Red Color
  * @param gValue Set Green Color
  * @param bValue Set Blue Color
  */
