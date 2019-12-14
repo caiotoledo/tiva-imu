@@ -14,12 +14,12 @@
  * @brief Width base for the PWM control
  * 
  */
-#define WIDTH_BASE			(1024)
+#define RGB_PWM_WIDTH_BASE	(1024U)
 /**
  * @brief Max RGB value
  * 
  */
-#define RGB_MAX_VALUE		(WIDTH_BASE-1)
+#define RGB_MAX_VALUE		(RGB_PWM_WIDTH_BASE-1)
 /**
  * @brief Min RGB Value
  * 

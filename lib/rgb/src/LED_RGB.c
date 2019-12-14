@@ -164,7 +164,7 @@ static void setLedDuty (LED_RGB led, uint32_t duty)
 	duty = duty > RGB_MAX_VALUE ? RGB_MAX_VALUE : duty;
 
 	/* Calculate base duty cycle */
-	base = PWMGenPeriodGet(PWM1_BASE, pwm_conf->PWMGen)*duty/WIDTH_BASE;
+	base = PWMGenPeriodGet(PWM1_BASE, pwm_conf->PWMGen)*duty/RGB_PWM_WIDTH_BASE;
 
 	/* Update Duty Cycle */
 	PWMPulseWidthSet(PWM1_BASE, pwm_conf->PWMOut, base);
