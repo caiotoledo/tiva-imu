@@ -15,7 +15,7 @@
 #include "driverlib/i2c.h"
 
 #include <version.h>
-#include <LED_RGB.h>
+#include <rgb.h>
 #include <hal_uart.h>
 #include <log.h>
 

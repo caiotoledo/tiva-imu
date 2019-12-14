@@ -3,7 +3,7 @@
 #include <stdint.h>
 
 #include <log.h>
-#include <LED_RGB.h>
+#include <rgb.h>
 #include <button.h>
 
 #include <timer.h>

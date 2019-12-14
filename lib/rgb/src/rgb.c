@@ -17,7 +17,7 @@
 #include "driverlib/sysctl.h"
 #include "driverlib/pwm.h"
 
-#include "LED_RGB.h"
+#include "rgb.h"
 
 #define PWM_PERIOD		(64000U)
 
