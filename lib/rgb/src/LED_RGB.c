@@ -104,7 +104,7 @@ static const tPWM_Pin_Conf *GetPWMConf(LED_RGB led)
 {
 	const tPWM_Pin_Conf *pwm_conf = 0U;
 	/* Search for PWM configuration */
-	for (uint8_t i = 0; i < sizeof(led_configurations)/sizeof(tLED_Conf); i++)
+	for (uint8_t i = 0; i < sizeof(led_configurations)/sizeof(led_configurations[0]); i++)
 	{
 		if (led_configurations[i].led == led)
 		{
