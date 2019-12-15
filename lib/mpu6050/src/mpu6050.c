@@ -66,6 +66,8 @@ typedef struct
 {
     eI2C_BASE i2c;
     tMPU6050_Addr_Map *map;
+    accel_t accelOffset;
+    gyro_t gyroOffset;
 } tMPU6050_Data;
 
 typedef struct
@@ -77,6 +79,8 @@ typedef struct
 
 static double ConvertIMUVal(uint16_t val, double constant);
 inline static tMPU6050_Conf *GetMPU6050Conf(eMPU6050_BASE mpu);
+static void ApplyAccelOffset(accel_t offset, accel_t *accel);
+static void ApplyGyroOffset(gyro_t offset, gyro_t *gyro);
 /* TODO: Implement function: */
 // static void SetMPU6050Data(eMPU6050_BASE mpu, tMPU6050_Data *data);
 
@@ -103,6 +107,8 @@ static tMPU6050_Conf mpu_configurations[] =
             {
                 .i2c =  DEFAULT_I2C_INTERFACE,
                 .map = reg_configuration,
+                .accelOffset = { 0, 0, 0 },
+                .gyroOffset = { 0, 0, 0 },
             },
     },
     {
@@ -112,6 +118,8 @@ static tMPU6050_Conf mpu_configurations[] =
             {
                 .i2c =  DEFAULT_I2C_INTERFACE,
                 .map = reg_configuration,
+                .accelOffset = { 0, 0, 0 },
+                .gyroOffset = { 0, 0, 0 },
             },
     },
 };
@@ -226,13 +234,15 @@ int MPU6050_ReadAllAccel(eMPU6050_BASE mpu,  accel_t *accel)
     {
         uint16_t raw_accel = (uint16_t)( (val[i] << 8) | val[i+1] );
         output_accel[i/2] = ConvertIMUVal(raw_accel, CONST_ACCEL);
-        /* TODO: Implement Acceleration Offset */
     }
 
     /* Store in the output buffer */
     accel->x = output_accel[0];
     accel->y = output_accel[1];
     accel->z = output_accel[2];
+
+    /* Apply Acceleration Offset */
+    ApplyAccelOffset(mpu_conf->conf.accelOffset, accel);
 
     ret = 0;
 
@@ -269,13 +279,15 @@ int MPU6050_ReadAllGyro(eMPU6050_BASE mpu, gyro_t *gyro)
     {
         uint16_t raw_gyro = (uint16_t)((val[i] << 8) | val[i + 1]);
         output_gyro[i/2] = ConvertIMUVal(raw_gyro, CONST_GYRO);
-        /* TODO: Implement Gyro Offset */
     }
 
     /* Store in the output buffer */
     gyro->x = output_gyro[0];
     gyro->y = output_gyro[1];
     gyro->z = output_gyro[2];
+
+    /* Apply Gyro Offset */
+    ApplyGyroOffset(mpu_conf->conf.gyroOffset, gyro);
 
     ret = 0;
 
@@ -333,6 +345,28 @@ static double ConvertIMUVal(uint16_t val, double constant)
         ret = -(((double)val) / constant);
     }
     return ret;
+}
+
+static void ApplyAccelOffset(accel_t offset, accel_t *accel)
+{
+    /* Pointer protection */
+    if (accel != NULL)
+    {
+        (*accel).x += offset.x;
+        (*accel).y += offset.y;
+        (*accel).z += offset.z;
+    }
+}
+
+static void ApplyGyroOffset(gyro_t offset, gyro_t *gyro)
+{
+    /* Pointer protection */
+    if (gyro != NULL)
+    {
+        (*gyro).x += offset.x;
+        (*gyro).y += offset.y;
+        (*gyro).z += offset.z;
+    }
 }
 
 inline static tMPU6050_Conf *GetMPU6050Conf(eMPU6050_BASE mpu)
