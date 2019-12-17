@@ -1,10 +1,3 @@
-/*
- * PWM_RGB.c
- *
- *  Created on: 14/05/2016
- *      Author: Caio
- */
-
 #include <stdint.h>
 #include <stdbool.h>
 
