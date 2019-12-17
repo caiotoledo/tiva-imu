@@ -27,7 +27,7 @@ add_subdirectory(tasks)
 # Link all tasks
 target_link_libraries(${PROJECT_NAME}
     led_task
-    mpu6050_task
+    imu_task
 )
 
 # Add local library:

@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 3.10)
-set(PROJECT_NAME mpu6050_task)
+set(PROJECT_NAME imu_task)
 project(${PROJECT_NAME})
 
 include(../../etc/toolchain_tivaware.cmake)
