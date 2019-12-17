@@ -1,5 +1,5 @@
-#ifndef MPU6050_LOGGER_H_
-#define MPU6050_LOGGER_H_
+#ifndef IMU_LOGGER_H_
+#define IMU_LOGGER_H_
 
 /**
  * @brief IMU Log Task
@@ -8,4 +8,5 @@
  */
 void vIMULogTask(void *pvParameters);
 
-#endif /* MPU6050_LOGGER_H_ */
+#endif /* #define IMU_LOGGER_H_
+ */

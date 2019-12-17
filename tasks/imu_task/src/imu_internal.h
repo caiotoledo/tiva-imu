@@ -1,5 +1,5 @@
-#ifndef MPU6050_INTERNAL_H_
-#define MPU6050_INTERNAL_H_
+#ifndef IMU_INTERNAL_H_
+#define IMU_INTERNAL_H_
 
 #include <timers.h>
 
@@ -10,4 +10,4 @@
  */
 void vMPU6050Task(TimerHandle_t xTimer);
 
-#endif /* MPU6050_INTERNAL_H_ */
+#endif /* IMU_INTERNAL_H_ */

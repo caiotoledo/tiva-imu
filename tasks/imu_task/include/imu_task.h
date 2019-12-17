@@ -1,5 +1,5 @@
-#ifndef MPU6050_TASK_H_
-#define MPU6050_TASK_H_
+#ifndef IMU_TASK_H_
+#define IMU_TASK_H_
 
 /**
  * @brief Initialize and sample the data from IMU
@@ -8,4 +8,4 @@
  */
 void vIMUTask(void *pvParameters);
 
-#endif /* MPU6050_TASK_H_ */
+#endif /* IMU_TASK_H_ */

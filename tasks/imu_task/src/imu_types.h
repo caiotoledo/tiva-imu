@@ -1,5 +1,5 @@
-#ifndef MPU6050_TYPES_H_
-#define MPU6050_TYPES_H_
+#ifndef IMU_TYPES_H_
+#define IMU_TYPES_H_
 
 #include <mpu6050.h>
 
@@ -23,4 +23,4 @@ typedef struct
     QueueHandle_t queue;
 } imuTaskConfig_t;
 
-#endif /* MPU6050_TYPES_H_ */
+#endif /* IMU_TYPES_H_ */
