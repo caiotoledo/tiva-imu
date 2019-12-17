@@ -13,10 +13,10 @@
 
 #include <tasks_config.h>
 
-#include "mpu6050_types.h"
-#include "mpu6050_task.h"
-#include "mpu6050_internal.h"
-#include "mpu6050_logger.h"
+#include "imu_types.h"
+#include "imu_task.h"
+#include "imu_internal.h"
+#include "imu_logger.h"
 
 /* Size of Queue IMU for data logging */
 #define QUEUE_IMU_LENGTH    (10U)

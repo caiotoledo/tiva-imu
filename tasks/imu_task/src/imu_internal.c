@@ -5,8 +5,8 @@
 
 #include <timer.h>
 
-#include "mpu6050_types.h"
-#include "mpu6050_internal.h"
+#include "imu_types.h"
+#include "imu_internal.h"
 
 void vMPU6050Task(TimerHandle_t xTimer)
 {

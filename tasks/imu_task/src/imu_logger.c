@@ -3,8 +3,8 @@
 
 #include <log.h>
 
-#include "mpu6050_types.h"
-#include "mpu6050_logger.h"
+#include "imu_types.h"
+#include "imu_logger.h"
 
 #define ABS(x)      (x < 0 ? (-x) : (x))
 
