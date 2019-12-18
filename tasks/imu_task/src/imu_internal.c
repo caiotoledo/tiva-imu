@@ -50,10 +50,10 @@ void vMPU6050Task(TimerHandle_t xTimer)
             .gyro = gyro,
             .temperature = temp,
         };
-        /* Wait for half of the period of the timer to the queue be available */
-        TickType_t xTimerPeriod = xTimerGetPeriod(xTimer)/2;
+        /* Wait remaining time before timer expires again to the queue be available */
+        TickType_t xRemainingTime = (xTimerGetExpiryTime(xTimer) - xTaskGetTickCount());
         /* Send IMU data via queue */
-        if (xQueueSend(taskParam.queue, (void *)&dataimu, xTimerPeriod) != pdTRUE)
+        if (xQueueSend(taskParam.queue, (void *)&dataimu, xRemainingTime) != pdTRUE)
         {
             ERROR("Full queue!");
         }
