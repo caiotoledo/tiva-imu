@@ -9,7 +9,7 @@ typedef enum {
 /**
  * @brief Enable all buttons GPIOs.
  * 
- * @param func Pointer function to provide the ms counter
+ * @param func Pointer function to provide the ms counter with support for ISR
  */
 void Button_Enable(uint32_t (*func)());
 

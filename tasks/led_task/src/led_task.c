@@ -33,7 +33,7 @@ void vLedTask(void *pvParameters)
     uint32_t RGBRainbowStep = RGB_RAINBOW_STEP_INITIAL;
 
     /* Initialize button API */
-    Button_Enable(GetMillis);
+    Button_Enable(GetMillisFromISR);
 
     for (;;)
     {

@@ -3,7 +3,12 @@
 
 #include "timer.h"
 
-uint32_t GetMillis(void)
+uint32_t GetMillisFromISR(void)
 {
     return (xTaskGetTickCountFromISR()/portTICK_RATE_MS);
+}
+
+uint32_t GetMillis(void)
+{
+    return (xTaskGetTickCount()/portTICK_RATE_MS);
 }
