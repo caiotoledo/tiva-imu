@@ -20,7 +20,6 @@ typedef struct
     uint32_t pin;
     uint32_t interrupt;
     uint32_t port;
-    uint32_t debounce_ms;
 } tButtonConf;
 
 typedef struct
@@ -46,7 +45,6 @@ tMapButton MapButton[] =
             .port = GPIO_PORTF_BASE,
             .interrupt = GPIO_INT_PIN_4,
             .pin = GPIO_PIN_4,
-            .debounce_ms = 0U,
         },
         .data =
         {
@@ -61,7 +59,6 @@ tMapButton MapButton[] =
             .port = GPIO_PORTF_BASE,
             .interrupt = GPIO_INT_PIN_0,
             .pin = GPIO_PIN_0,
-            .debounce_ms = 0U,
         },
         .data =
         {
