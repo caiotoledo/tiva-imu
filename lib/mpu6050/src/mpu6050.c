@@ -205,7 +205,7 @@ end_mpu6050_probe:
     return ret;
 }
 
-int MPU6050_ReadAllAccel(eMPU6050_BASE mpu,  accel_t *accel)
+int MPU6050_ReadAllAccel(eMPU6050_BASE mpu, accel_t *accel)
 {
     int ret = -1;
 
