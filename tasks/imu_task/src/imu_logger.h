@@ -8,5 +8,4 @@
  */
 void vIMULogTask(void *pvParameters);
 
-#endif /* #define IMU_LOGGER_H_
- */
+#endif /* #define IMU_LOGGER_H_ */
