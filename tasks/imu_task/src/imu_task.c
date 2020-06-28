@@ -9,8 +9,6 @@
 #include <queue.h>
 #include <timers.h>
 
-#include <timer.h>
-
 #include <tasks_config.h>
 
 #include "imu_types.h"
@@ -53,21 +51,14 @@ void vIMUTask(void *pvParameters)
     {
         /* Store the Queue Handler in task configuration */
         taskConfig[i].queue = xIMUQueue;
-        if (MPU6050_Enable(taskConfig[i].mpu, taskConfig[i].i2c, GetMillis) == 0)
+        /* START MPU6050 Task */
+        if (xTaskCreate(vMPU6050Task, "MPU6050 Task", TASK_IMU_STACKSIZE, (void *) &taskConfig[i], TASK_IMU_PRIORITY, NULL) != pdPASS)
         {
-            /* START IMU SAMPLE TIMER */
-            TimerHandle_t xTimerMPU6050 = xTimerCreate("MPU6050 Timer", TASK_MPU6050_PERIOD, pdTRUE, (void *) &taskConfig[i], vMPU6050Task);
-            if ( (xTimerMPU6050 == NULL) || (xTimerStart(xTimerMPU6050, 0) != pdPASS) )
-            {
-                ERROR("Timer [%s] NOT created!");
-                /* Do not go further if the timer couldn't be created */
-                continue;
-            }
-            INFO("Timer [%s] created!", taskConfig[i].name);
+            ERROR("Task [%s] NOT created!", taskConfig[i].name);
         }
         else
         {
-            ERROR("[%s] Enable Error!", taskConfig[i].name);
+            INFO("Task [%s] created!", taskConfig[i].name);
         }
     }
 

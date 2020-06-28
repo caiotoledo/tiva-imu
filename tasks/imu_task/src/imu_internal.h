@@ -8,6 +8,6 @@
  *
  * @param xTimer Handler to provide #imuTaskConfig_t configuration
  */
-void vMPU6050Task(TimerHandle_t xTimer);
+void vMPU6050Task(void *pvParameters);
 
 #endif /* IMU_INTERNAL_H_ */
