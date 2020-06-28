@@ -93,7 +93,7 @@ static tMPU6050_Addr_Map reg_configuration[] =
     { .AddrReg = MPU6050_GYRO_CONFIG,   .val = 0x00, },
     { .AddrReg = MPU6050_ACCEL_CONFIG,  .val = 0x00, },
     { .AddrReg = MPU6050_INT_CONFIG,    .val = 0x00, },
-    { .AddrReg = MPU6050_INT_ENABLE,    .val = 0x00, },
+    { .AddrReg = MPU6050_INT_ENABLE,    .val = 0x01, },
     { .AddrReg = MPU6050_USER_CTRL,     .val = 0x00, },
     { .AddrReg = MPU6050_PWR_MGMT_1,    .val = 0x00, },
     { .AddrReg = INVALID_ADDR,          .val = 0xFF, },
