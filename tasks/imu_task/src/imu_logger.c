@@ -23,6 +23,7 @@ void vIMULogTask(void *pvParameters)
             int integer[3];
             uint32_t frac[3];
 
+            INFO("");
             INFO("[%s] TIME %d ms", data.imu, data.ms);
 
             /* Convert Accel Double values for print */
