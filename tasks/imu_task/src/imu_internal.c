@@ -18,6 +18,8 @@
 #include "driverlib/sysctl.h"
 #include "driverlib/pin_map.h"
 
+#define IMU_SAMPLE_RATE         (1000/portTICK_RATE_MS)
+
 #define I2C_BASE_COUNT          (I2C3+1)
 #define MPU6050_BASE_COUNT      (MPU6050_HIGH+1)
 
@@ -58,10 +60,12 @@ void vMPU6050Task(void *pvParameters)
         mtxIMU = xSemaphoreCreateMutex();
     }
 
+    /* Timer initialization */
+    TickType_t xLastWakeTime = xTaskGetTickCount();
     for (;;)
     {
         /* Wait IMU Data to be ready */
-        xSemaphoreTake(xIMUDataReadySemaphore, (1000/portTICK_RATE_MS));
+        xSemaphoreTake(xIMUDataReadySemaphore, (10/portTICK_RATE_MS));
 
         /* Lock IMU mutex */
         xSemaphoreTake(mtxIMU, portMAX_DELAY);
@@ -102,6 +106,8 @@ void vMPU6050Task(void *pvParameters)
         {
             ERROR("Error IMU Read!");
         }
+
+        vTaskDelayUntil(&xLastWakeTime, (TickType_t)IMU_SAMPLE_RATE);
     }
 
 end_mpu6050_task:
