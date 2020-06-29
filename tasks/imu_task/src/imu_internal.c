@@ -116,7 +116,11 @@ static void GPIO_ISP_Handler(void)
 
     if ((status & GPIO_INT_PIN) == GPIO_INT_PIN)
     {
-        xSemaphoreGiveFromISR(xIMUDataReadySemaphore, NULL);
+        uint32_t stGpio = GPIOPinRead(GPIO_PORT_BASE, GPIO_INT_PIN);
+        if ((stGpio & GPIO_INT_PIN) != 0)
+        {
+            xSemaphoreGiveFromISR(xIMUDataReadySemaphore, NULL);
+        }
     }
 }
 
