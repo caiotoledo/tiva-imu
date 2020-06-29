@@ -20,9 +20,6 @@
 
 #define IMU_SAMPLE_RATE         (1000/portTICK_RATE_MS)
 
-#define I2C_BASE_COUNT          (I2C3+1)
-#define MPU6050_BASE_COUNT      (MPU6050_HIGH+1)
-
 #define SYSCTL_PERIPH_GPIO      (SYSCTL_PERIPH_GPIOA)
 #define GPIO_PORT_BASE          (GPIO_PORTA_BASE)
 #define GPIO_PIN                (GPIO_PIN_5)
