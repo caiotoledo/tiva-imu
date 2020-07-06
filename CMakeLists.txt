@@ -18,39 +18,6 @@ if ("${TIVAWARE_PATH}" STREQUAL "")
 endif()
 include_directories("${TIVAWARE_PATH}")
 
-# Create the binary
-add_executable(${PROJECT_NAME} ${src_files})
-
-# Add tasks library:
-add_subdirectory(tasks)
-
-# Link all tasks
-target_link_libraries(${PROJECT_NAME}
-    led_task
-    imu_task
-)
-
-# Add local library:
-add_subdirectory(lib)
-
-# Link all local libraries
-target_link_libraries(${PROJECT_NAME}
-    timer
-    rgb
-    mpu6050
-    button
-    uart
-    mcu
-)
-
-# Add FreeRTOS library
-add_subdirectory(thirdparty)
-
-# Link all third party libraries
-target_link_libraries(${PROJECT_NAME}
-    freertos
-)
-
 # define objcopy macro
 macro(OBJCOPY_FILE EXE_NAME)
     set(FO ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${EXE_NAME}.bin)
@@ -72,5 +39,59 @@ macro(OBJCOPY_FILE EXE_NAME)
     set_source_files_properties("${FO}" PROPERTIES GENERATED TRUE)
 endmacro(OBJCOPY_FILE)
 
-# set the objcopy for binary file
-objcopy_file(${PROJECT_NAME})
+if(CMAKE_CROSSCOMPILING)
+    # Create the binary
+    add_executable(${PROJECT_NAME} ${src_files})
+
+    # Add tasks library:
+    add_subdirectory(tasks)
+    # Link all tasks
+    target_link_libraries(${PROJECT_NAME}
+        led_task
+        imu_task
+    )
+
+    # Add local library:
+    add_subdirectory(lib)
+    # Link all local libraries
+    target_link_libraries(${PROJECT_NAME}
+        timer
+        rgb
+        mpu6050
+        button
+        uart
+        mcu
+    )
+
+    # Add FreeRTOS library
+    add_subdirectory(thirdparty)
+    # Link all third party libraries
+    target_link_libraries(${PROJECT_NAME}
+        freertos
+    )
+
+    # set the objcopy for binary file
+    objcopy_file(${PROJECT_NAME})
+endif(CMAKE_CROSSCOMPILING)
+
+# Macro for Google Test
+macro(package_gtest TESTNAME)
+    cmake_parse_arguments(
+        INPUT_ARG
+        ""
+        ""
+        "SRC;INCLUDE"
+        ${ARGN}
+    )
+    # Execute only for host compilation
+    if(NOT CMAKE_CROSSCOMPILING)
+        find_package(GTest REQUIRED)
+        set(TEST_PROGRAM test_${TESTNAME})
+        message(STATUS "Adding google test: ${TESTNAME}")
+        add_executable(${TEST_PROGRAM} ${INPUT_ARG_SRC})
+        target_include_directories(${TEST_PROGRAM} PRIVATE ${GTEST_INCLUDE_DIRS} ${INPUT_ARG_INCLUDE})
+        target_link_libraries(${TEST_PROGRAM} ${GTEST_LIBRARIES} gtest_main gmock gmock_main pthread)
+    endif()
+endmacro(package_gtest)
+
+add_subdirectory(lib/timer/tests)
