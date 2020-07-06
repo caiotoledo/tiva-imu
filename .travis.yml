@@ -1,22 +1,51 @@
-language: c
-compiler: gcc
+dist: bionic
 os: linux
+language:
+  - c
+  - cpp
+compiler:
+  - gcc
 
 addons:
   apt:
     packages:
       - gcc-arm-none-eabi
+      - cmake
 
 before_script:
+  # Install GTest and GMock
+  - git clone --branch release-1.8.1 https://github.com/google/googletest.git
+  - cd googletest
+  - sudo cmake -DBUILD_SHARED_LIBS=ON .
+  - sudo make
+  - sudo cp -a googletest/include/gtest /usr/include
+  - sudo cp -a googlemock/include/gmock /usr/include
+  - find . -iname "*.so" | xargs -I{} sudo cp -a {} /usr/lib/
+  - cd ../
+  # Download tivaware library
+  - git clone https://github.com/yuvadm/tiva-c.git ~/tiva-c/
+  # Show current versions
+  - gcc --version
+  - g++ --version
   - cmake --version
   - arm-none-eabi-gcc --version
 
-script:
-  # Download tivaware library
-  - git clone https://github.com/yuvadm/tiva-c.git
-  # Run cmake
-  - cmake -DCMAKE_TOOLCHAIN_FILE=./etc/toolchain_tivaware.cmake -DTIVAWARE_PATH=$(realpath ./tiva-c) .
-  - cmake -DCMAKE_TOOLCHAIN_FILE=./etc/toolchain_tivaware.cmake -DTIVAWARE_PATH=$(realpath ./tiva-c) .
-  # build project
-  # FIXME: Make command not working because of issues in arm-none-eabi-gcc version
-  # - make
+jobs:
+  include:
+    - stage: Crosscompile Build
+      script:
+        # Run cmake
+        - cmake -DCMAKE_TOOLCHAIN_FILE=./etc/toolchain_tivaware.cmake -DTIVAWARE_PATH=$(realpath ~/tiva-c) .
+        - cmake -DCMAKE_TOOLCHAIN_FILE=./etc/toolchain_tivaware.cmake -DTIVAWARE_PATH=$(realpath ~/tiva-c) .
+        # build project
+        # FIXME: Make command not working because of issues in arm-none-eabi-gcc version
+        # - make
+    - stage: Unittest
+      script:
+        # Run cmake
+        - cmake -DTIVAWARE_PATH=$(realpath ~/tiva-c) .
+        # build unittest
+        - make
+        # Run tests
+        - find ../.bin/ -name \"test_*\" | xargs -I{} bash -c {}
+        - ../.bin/test_timer
