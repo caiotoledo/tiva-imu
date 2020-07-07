@@ -47,5 +47,4 @@ jobs:
         # build unittest
         - make
         # Run tests
-        - find ../.bin/ -name \"test_*\" | xargs -I{} bash -c {}
-        - ../.bin/test_timer
+        - make test

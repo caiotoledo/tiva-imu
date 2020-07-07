@@ -2,8 +2,8 @@ cmake_minimum_required (VERSION 3.10)
 set(PROJECT_NAME program)
 project(${PROJECT_NAME})
 
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/../.bin)
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/../.bin)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/.bin)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/.bin)
 
 set(src_dir "${PROJECT_SOURCE_DIR}/src/")
 file(GLOB_RECURSE src_files "${src_dir}/*.c")
@@ -74,6 +74,7 @@ if(CMAKE_CROSSCOMPILING)
     objcopy_file(${PROJECT_NAME})
 endif(CMAKE_CROSSCOMPILING)
 
+enable_testing()
 # Macro for Google Test
 macro(package_gtest TESTNAME)
     cmake_parse_arguments(
@@ -91,6 +92,10 @@ macro(package_gtest TESTNAME)
         add_executable(${TEST_PROGRAM} ${INPUT_ARG_SRC})
         target_include_directories(${TEST_PROGRAM} PRIVATE ${GTEST_INCLUDE_DIRS} ${INPUT_ARG_INCLUDE})
         target_link_libraries(${TEST_PROGRAM} ${GTEST_LIBRARIES} gtest_main gmock gmock_main pthread)
+        # Add test to be run in ctest
+        add_test(NAME ${TESTNAME}
+            COMMAND ${TEST_PROGRAM}
+            WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
     endif()
 endmacro(package_gtest)
 
