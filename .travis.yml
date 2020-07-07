@@ -9,8 +9,12 @@ compiler:
 addons:
   apt:
     packages:
-      - gcc-arm-none-eabi
       - cmake
+
+before_install:
+  - sudo add-apt-repository -y ppa:team-gcc-arm-embedded/ppa
+  - sudo apt-get -q update
+  - sudo apt install gcc-arm-embedded -y
 
 before_script:
   # Install GTest and GMock
