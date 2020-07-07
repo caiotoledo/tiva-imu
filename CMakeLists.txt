@@ -8,10 +8,8 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/.bin)
 set(src_dir "${PROJECT_SOURCE_DIR}/src/")
 file(GLOB_RECURSE src_files "${src_dir}/*.c")
 
-# Disable compiler optimization:
+# Disable compiler optimization in debug:
 set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O0")
-
-include_directories("${PROJECT_SOURCE_DIR}/include")
 
 # define objcopy macro
 macro(OBJCOPY_FILE EXE_NAME)
@@ -43,6 +41,7 @@ if(CMAKE_CROSSCOMPILING)
 
     # Create the binary
     add_executable(${PROJECT_NAME} ${src_files})
+    include_directories("${PROJECT_SOURCE_DIR}/include")
 
     # Add tasks library:
     add_subdirectory(tasks)
