@@ -36,11 +36,24 @@ void vMPU6050Task(void *pvParameters)
 
     imuTaskConfig_t taskParam = *(( imuTaskConfig_t * ) pvParameters);
 
+    /* Initialize the Mutex for this task only once */
+    static SemaphoreHandle_t mtxIMU = NULL;
+    if (mtxIMU == NULL)
+    {
+        mtxIMU = xSemaphoreCreateMutex();
+    }
+
+    /* Lock IMU mutex */
+    xSemaphoreTake(mtxIMU, portMAX_DELAY);
     if (MPU6050_Enable(taskParam.mpu, taskParam.i2c, GetMillis) != 0)
     {
         ERROR("[%s] Enable Error!", taskParam.name);
+        /* Release IMU mutex */
+        xSemaphoreGive(mtxIMU);
         goto end_mpu6050_task;
     }
+    /* Release IMU mutex */
+    xSemaphoreGive(mtxIMU);
 
     /* Initialize the Interrupt GPIO */
     vConfigGPIOInt();
@@ -48,13 +61,6 @@ void vMPU6050Task(void *pvParameters)
     if (xIMUDataReadySemaphore == NULL)
     {
         xIMUDataReadySemaphore = xSemaphoreCreateBinary();
-    }
-
-    /* Initialize the Mutex for this task only once */
-    static SemaphoreHandle_t mtxIMU = NULL;
-    if (mtxIMU == NULL)
-    {
-        mtxIMU = xSemaphoreCreateMutex();
     }
 
     /* Timer initialization */
@@ -127,7 +133,11 @@ static void GPIO_ISP_Handler(void)
         uint32_t stGpio = GPIOPinRead(GPIO_PORT_BASE, GPIO_INT_PIN);
         if ((stGpio & GPIO_INT_PIN) != 0)
         {
-            xSemaphoreGiveFromISR(xIMUDataReadySemaphore, NULL);
+            /* Check if the semaphore is initialized */
+            if (xIMUDataReadySemaphore != NULL)
+            {
+                xSemaphoreGiveFromISR(xIMUDataReadySemaphore, NULL);
+            }
         }
     }
 }
