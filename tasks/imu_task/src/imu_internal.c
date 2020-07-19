@@ -73,8 +73,6 @@ void vMPU6050Task(void *pvParameters)
             WARN("IMU Data not Ready!");
         }
 
-        xSemaphoreTake(xIMUDataReadySemaphore, (10/portTICK_RATE_MS));
-
         /* Lock IMU mutex */
         xSemaphoreTake(mtxIMU, portMAX_DELAY);
 
