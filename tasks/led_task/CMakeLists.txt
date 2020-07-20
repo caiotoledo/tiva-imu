@@ -2,7 +2,7 @@ cmake_minimum_required (VERSION 3.10)
 set(PROJECT_NAME led_task)
 project(${PROJECT_NAME})
 
-include(../../etc/toolchain_tivaware.cmake)
+include(${CMAKE_TOOLCHAIN_FILE})
 
 set(src_dir "${PROJECT_SOURCE_DIR}/src/")
 file(GLOB src_files "${src_dir}/*.c")
