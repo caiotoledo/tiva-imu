@@ -20,6 +20,7 @@ typedef struct
     char *name;
     eMPU6050_BASE mpu;
     eI2C_BASE i2c;
+    eMPU6050_GPIOInt gpio_int;
     QueueHandle_t queue;
 } imuTaskConfig_t;
 

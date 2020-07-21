@@ -20,13 +20,7 @@
 
 #define IMU_SAMPLE_RATE         (1000/portTICK_RATE_MS)
 
-#define SYSCTL_PERIPH_GPIO      (SYSCTL_PERIPH_GPIOA)
-#define GPIO_PORT_BASE          (GPIO_PORTA_BASE)
-#define GPIO_PIN                (GPIO_PIN_5)
-#define GPIO_INT_PIN            (GPIO_INT_PIN_5)
-
-static void GPIO_ISP_Handler(void);
-static void vConfigGPIOInt(void);
+static void MPU6050_DataReady_Cb(eMPU6050_BASE mpu);
 
 static SemaphoreHandle_t xIMUDataReadySemaphore = NULL;
 
@@ -56,7 +50,13 @@ void vMPU6050Task(void *pvParameters)
     xSemaphoreGive(mtxIMU);
 
     /* Initialize the Interrupt GPIO */
-    vConfigGPIOInt();
+    int retGpioInt = MPU6050_ConfigInterrupt(taskParam.mpu, taskParam.gpio_int, MPU6050_DataReady_Cb);
+    if (retGpioInt != 0)
+    {
+        ERROR("[%s] Interrupt Configuration Error!", taskParam.name);
+        goto end_mpu6050_task;
+    }
+
     /* Attempt to create a semaphore. */
     if (xIMUDataReadySemaphore == NULL)
     {
@@ -121,33 +121,11 @@ end_mpu6050_task:
     vTaskSuspend(NULL);
 }
 
-static void GPIO_ISP_Handler(void)
+static void MPU6050_DataReady_Cb(eMPU6050_BASE mpu)
 {
-    uint32_t status = GPIOIntStatus(GPIO_PORT_BASE,true);
-    GPIOIntClear(GPIO_PORT_BASE,status);
-
-    if ((status & GPIO_INT_PIN) == GPIO_INT_PIN)
+    /* Check if the semaphore is initialized */
+    if (xIMUDataReadySemaphore != NULL)
     {
-        uint32_t stGpio = GPIOPinRead(GPIO_PORT_BASE, GPIO_INT_PIN);
-        if ((stGpio & GPIO_INT_PIN) != 0)
-        {
-            /* Check if the semaphore is initialized */
-            if (xIMUDataReadySemaphore != NULL)
-            {
-                xSemaphoreGiveFromISR(xIMUDataReadySemaphore, NULL);
-            }
-        }
+        xSemaphoreGiveFromISR(xIMUDataReadySemaphore, NULL);
     }
-}
-
-static void vConfigGPIOInt(void)
-{
-    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIO);
-
-    GPIODirModeSet(GPIO_PORT_BASE, GPIO_PIN, GPIO_DIR_MODE_IN);
-    GPIOPadConfigSet(GPIO_PORT_BASE, GPIO_PIN, GPIO_STRENGTH_2MA, GPIO_PIN_TYPE_STD_WPD);
-
-    GPIOIntTypeSet(GPIO_PORT_BASE,GPIO_PIN,GPIO_RISING_EDGE);
-    GPIOIntRegister(GPIO_PORT_BASE,GPIO_ISP_Handler);
-    GPIOIntEnable(GPIO_PORT_BASE, GPIO_INT_PIN);
 }

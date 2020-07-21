@@ -21,8 +21,20 @@
 
 static imuTaskConfig_t taskConfig[] =
 {
-    { .name = "MPU6050 Low",    .mpu = MPU6050_LOW,     .i2c= I2C1, .queue = NULL},
-    { .name = "MPU6050 High",   .mpu = MPU6050_HIGH,    .i2c= I2C1, .queue = NULL},
+    {
+        .name = "MPU6050 Low",
+        .mpu = MPU6050_LOW,
+        .i2c= I2C1,
+        .gpio_int = GPIO_PA5,
+        .queue = NULL
+    },
+    {
+        .name = "MPU6050 High",
+        .mpu = MPU6050_HIGH,
+        .i2c= I2C1,
+        .gpio_int = GPIO_PA4,
+        .queue = NULL
+    },
 };
 
 void vIMUTask(void *pvParameters)
