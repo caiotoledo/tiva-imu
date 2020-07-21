@@ -6,7 +6,8 @@
 #include "imu_types.h"
 #include "imu_logger.h"
 
-#define ABS(x)      (x < 0 ? (-x) : (x))
+#define ABS(x)          (x < 0 ? (-x) : (x))
+#define FRAC_PRECISION  (4U)
 
 static inline void vDouble2IntFrac(double input, int *integer, uint32_t *fraction, uint8_t precision);
 
@@ -27,19 +28,19 @@ void vIMULogTask(void *pvParameters)
             INFO("[%s] TIME %d ms", data.imu, data.ms);
 
             /* Convert Accel Double values for print */
-            vDouble2IntFrac(data.accel.x, &integer[0], &frac[0], 4U);
-            vDouble2IntFrac(data.accel.y, &integer[1], &frac[1], 4U);
-            vDouble2IntFrac(data.accel.z, &integer[2], &frac[2], 4U);
+            vDouble2IntFrac(data.accel.x, &integer[0], &frac[0], FRAC_PRECISION);
+            vDouble2IntFrac(data.accel.y, &integer[1], &frac[1], FRAC_PRECISION);
+            vDouble2IntFrac(data.accel.z, &integer[2], &frac[2], FRAC_PRECISION);
             INFO("[Accel] X[%d.%04u] Y[%d.%04u] Z[%d.%04u]", integer[0], frac[0], integer[1], frac[1], integer[2], frac[2]);
 
             /* Convert Gyro Double values for print */
-            vDouble2IntFrac(data.gyro.x, &integer[0], &frac[0], 4U);
-            vDouble2IntFrac(data.gyro.y, &integer[1], &frac[1], 4U);
-            vDouble2IntFrac(data.gyro.z, &integer[2], &frac[2], 4U);
+            vDouble2IntFrac(data.gyro.x, &integer[0], &frac[0], FRAC_PRECISION);
+            vDouble2IntFrac(data.gyro.y, &integer[1], &frac[1], FRAC_PRECISION);
+            vDouble2IntFrac(data.gyro.z, &integer[2], &frac[2], FRAC_PRECISION);
             INFO("[Gyro] X[%d.%04u] Y[%d.%04u] Z[%d.%04u]", integer[0], frac[0], integer[1], frac[1], integer[2], frac[2]);
 
             /* Convert Temperature Double values for print */
-            vDouble2IntFrac(data.temperature, &integer[0], &frac[0], 4U);
+            vDouble2IntFrac(data.temperature, &integer[0], &frac[0], FRAC_PRECISION);
             INFO("[Temperature] [%d.%04u]", integer[0], frac[0]);
         }
     }
