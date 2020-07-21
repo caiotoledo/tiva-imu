@@ -11,6 +11,13 @@ file(GLOB_RECURSE src_files "${src_dir}/*.c")
 # Disable compiler optimization in debug:
 set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O0")
 
+# Retrieve current commit hash
+execute_process (
+    COMMAND git rev-parse --short HEAD
+    OUTPUT_VARIABLE COMMIT_HASH
+)
+string(STRIP ${COMMIT_HASH} COMMIT_HASH)
+
 # define objcopy macro
 macro(OBJCOPY_FILE EXE_NAME)
     set(FO ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${EXE_NAME}.bin)
@@ -66,6 +73,9 @@ if(CMAKE_CROSSCOMPILING)
     target_link_libraries(${PROJECT_NAME}
         freertos
     )
+
+    # Add git short commit hash macro
+    add_definitions(-DCOMMIT_HASH="${COMMIT_HASH}")
 
     # set the objcopy for binary file
     objcopy_file(${PROJECT_NAME})

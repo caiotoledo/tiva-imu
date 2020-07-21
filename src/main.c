@@ -31,6 +31,9 @@
 #include <imu_task.h>
 
 #define PROGRAM_NAME            "tiva-imu"
+#ifndef COMMIT_HASH
+#define COMMIT_HASH                ""
+#endif
 
 #define UNUSED(x)               ((void)x)
 
@@ -64,7 +67,7 @@ int main()
 
     /* Start Program */
     LOG_UART("Start %s", PROGRAM_NAME);
-    LOG_UART("Version: %u.%u.%u.%d", MAJOR_VERSION, MINOR_VERSION, RELEASE_VERSION, __INT_TIMESTAMP__);
+    LOG_UART("Version: %u.%u.%u.%s-%d", MAJOR_VERSION, MINOR_VERSION, RELEASE_VERSION, COMMIT_HASH, __INT_TIMESTAMP__);
 
     /* Initialize LEDs */
     LED_Enable();
