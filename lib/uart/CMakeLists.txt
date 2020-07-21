@@ -15,6 +15,6 @@ include_directories("${PROJECT_SOURCE_DIR}/../include")
 add_library(${PROJECT_NAME} STATIC ${src_files} ${src_uartstdio})
 target_include_directories(${PROJECT_NAME} INTERFACE ${PROJECT_SOURCE_DIR}/include)
 
-target_link_libraries(${PROJECT_NAME}
+target_link_libraries(${PROJECT_NAME} PRIVATE
     ${TIVAWARE_PATH}/driverlib/gcc/libdriver.a
 )

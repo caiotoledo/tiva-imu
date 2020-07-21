@@ -12,4 +12,4 @@ include_directories("${PROJECT_SOURCE_DIR}/include")
 add_library(${PROJECT_NAME} STATIC ${src_files})
 target_include_directories(${PROJECT_NAME} INTERFACE ${PROJECT_SOURCE_DIR}/include)
 
-target_link_libraries(${PROJECT_NAME} timer button rgb uart freertos)
+target_link_libraries(${PROJECT_NAME} PRIVATE timer button rgb uart freertos)

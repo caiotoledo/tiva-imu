@@ -55,10 +55,7 @@ if(CMAKE_CROSSCOMPILING)
     add_subdirectory(lib)
     # Link all local libraries
     target_link_libraries(${PROJECT_NAME}
-        timer
         rgb
-        mpu6050
-        button
         uart
         mcu
     )
