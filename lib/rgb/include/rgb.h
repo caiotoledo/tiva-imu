@@ -1,10 +1,3 @@
-/*
- * PWM_RGB.h
- *
- *  Created on: 14/05/2016
- *      Author: Caio
- */
-
 #ifndef LED_RGB_H_
 #define LED_RGB_H_
 
