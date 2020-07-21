@@ -10,22 +10,30 @@
 /* Enable ERROR logs */
 // #define LOG_DEBUG_ERROR
 
+#define LOG_UART(LEVEL, ...)            \
+do {                                    \
+        UARTprintf("[%s] ",__func__);   \
+        UARTprintf("%s: ",#LEVEL);      \
+        UARTprintf(__VA_ARGS__);        \
+        UARTprintf("\r\n");             \
+} while(0)                              \
+
 #ifdef LOG_DEBUG_INFO
     #define LOG_DEBUG_WARN
-    #define INFO(...)      UARTprintf("[%s] INFO: ",__func__); UARTprintf(__VA_ARGS__); UARTprintf("\r\n");
+    #define INFO(...)       LOG_UART(INFO, __VA_ARGS__)
 #else
     #define INFO(...)
 #endif
 
 #ifdef LOG_DEBUG_WARN
     #define LOG_DEBUG_ERROR
-    #define WARN(...)      UARTprintf("[%s] WARN: ",__func__); UARTprintf(__VA_ARGS__); UARTprintf("\r\n");
+    #define WARN(...)      LOG_UART(WARN, __VA_ARGS__)
 #else
     #define WARN(...)
 #endif
 
 #ifdef LOG_DEBUG_ERROR
-    #define ERROR(...)      UARTprintf("[%s] ERROR: ",__func__); UARTprintf(__VA_ARGS__); UARTprintf("\r\n");
+    #define ERROR(...)      LOG_UART(ERROR, __VA_ARGS__)
 #else
     #define ERROR(...)
 #endif
