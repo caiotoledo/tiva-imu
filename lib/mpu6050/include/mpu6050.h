@@ -9,6 +9,12 @@ typedef enum
     MPU6050_HIGH,
 } eMPU6050_BASE;
 
+typedef enum
+{
+    GPIO_PA4,
+    GPIO_PA5,
+} eMPU6050_GPIOInt;
+
 typedef struct
 {
     double x;
@@ -23,6 +29,8 @@ typedef struct
     double z;
 } gyro_t;
 
+typedef void (*MPU6050_Callback)(eMPU6050_BASE mpu);
+
 /**
  * @brief Enable MPU6050
  *
@@ -32,6 +40,16 @@ typedef struct
  * @return int Return 0 if successful
  */
 int MPU6050_Enable(eMPU6050_BASE mpu, eI2C_BASE i2c, uint32_t (*func)());
+
+/**
+ * @brief Configure Interrupt for MPU6050 (Only DataReady)
+ *
+ * @param mpu MPU Interface (see #eMPU6050_BASE)
+ * @param pin GPIO Pin used for Interrupt (see #eMPU6050_GPIOInt)
+ * @param callback Interrupt Callback (see #MPU6050_Callback)
+ * @return int Return 0 if successful
+ */
+int MPU6050_ConfigInterrupt(eMPU6050_BASE mpu, eMPU6050_GPIOInt pin, MPU6050_Callback callback);
 
 /**
  * @brief Verify MP6050 Presence in the bus

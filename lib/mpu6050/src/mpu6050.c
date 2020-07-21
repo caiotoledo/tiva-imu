@@ -2,6 +2,16 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+/* GPIO Related includes */
+#include "inc/hw_types.h"
+#include "inc/hw_gpio.h"
+#include "inc/hw_memmap.h"
+#include "inc/hw_sysctl.h"
+#include "driverlib/gpio.h"
+#include "driverlib/rom.h"
+#include "driverlib/sysctl.h"
+#include "driverlib/pin_map.h"
+
 #include <log.h>
 #include <mpu6050.h>
 
@@ -20,6 +30,16 @@ do {                                                \
     if (pConf == NULL)                              \
     {                                               \
         ERROR("Invalid Configuration! [%d]", mpu);  \
+        goto error_goto;                            \
+    }                                               \
+} while(0)                                          \
+
+#define GET_GPIO_CONF(pConf, gpio, error_goto)      \
+do {                                                \
+    pConf = GetGPIOConf(gpio);                      \
+    if (pConf == NULL)                              \
+    {                                               \
+        ERROR("Invalid Configuration! [%d]", gpio); \
         goto error_goto;                            \
     }                                               \
 } while(0)                                          \
@@ -78,8 +98,26 @@ typedef struct
     tMPU6050_Data conf;
 } tMPU6050_Conf;
 
+typedef struct
+{
+    eMPU6050_BASE mpu;
+    MPU6050_Callback cb;
+    uint32_t GPIOPeripheral;
+    uint32_t GPIOPortBase;
+    uint32_t GPIOPin;
+    uint32_t GPIOPinInt;
+} tGPIO_Conf;
+
+typedef struct
+{
+    eMPU6050_GPIOInt gpio;
+    tGPIO_Conf conf;
+} tMPU6050_GPIOInt;
+
 static double ConvertIMUVal(uint16_t val, double constant);
 inline static tMPU6050_Conf *GetMPU6050Conf(eMPU6050_BASE mpu);
+inline static tGPIO_Conf *GetGPIOConf(eMPU6050_GPIOInt gpio);
+static void GPIOA_ISP_Handler(void);
 static void ApplyAccelOffset(accel_t offset, accel_t *accel);
 static void ApplyGyroOffset(gyro_t offset, gyro_t *gyro);
 /* TODO: Implement function: */
@@ -123,6 +161,35 @@ static tMPU6050_Conf mpu_configurations[] =
                 .accelOffset = { 0, 0, 0 },
                 .gyroOffset = { 0, 0, 0 },
             },
+    },
+};
+
+/* Map for GPIO Interrupt configuration: */
+static tMPU6050_GPIOInt gpio_configurations[] =
+{
+    {
+        .gpio = GPIO_PA4,
+        .conf =
+            {
+                .mpu = 0xFF,
+                .cb = NULL,
+                .GPIOPeripheral = SYSCTL_PERIPH_GPIOA,
+                .GPIOPortBase = GPIO_PORTA_BASE,
+                .GPIOPin = GPIO_PIN_4,
+                .GPIOPinInt = GPIO_INT_PIN_4,
+            }
+    },
+    {
+        .gpio = GPIO_PA5,
+        .conf =
+            {
+                .mpu = 0xFF,
+                .cb = NULL,
+                .GPIOPeripheral = SYSCTL_PERIPH_GPIOA,
+                .GPIOPortBase = GPIO_PORTA_BASE,
+                .GPIOPin = GPIO_PIN_5,
+                .GPIOPinInt = GPIO_INT_PIN_5,
+            }
     },
 };
 
@@ -182,6 +249,41 @@ int MPU6050_Enable(eMPU6050_BASE mpu, eI2C_BASE i2c, uint32_t (*func)())
 
     ret = 0;
 end_mpu6050_enable:
+    return ret;
+}
+
+int MPU6050_ConfigInterrupt(eMPU6050_BASE mpu, eMPU6050_GPIOInt pin, MPU6050_Callback callback)
+{
+    int ret = -1;
+
+    tGPIO_Conf *gpio_conf;
+    GET_GPIO_CONF(gpio_conf, pin, end_mpu6050_configint);
+
+    /* Check if the GPIO was already used by another MPU6050 */
+    if ((gpio_conf->mpu != 0xFF) || (gpio_conf->cb != NULL))
+    {
+        goto end_mpu6050_configint;
+    }
+
+    /* Configure GPIO */
+    SysCtlPeripheralEnable(gpio_conf->GPIOPeripheral);
+
+    GPIODirModeSet(gpio_conf->GPIOPortBase, gpio_conf->GPIOPin, GPIO_DIR_MODE_IN);
+    GPIOPadConfigSet(gpio_conf->GPIOPortBase, gpio_conf->GPIOPin, GPIO_STRENGTH_2MA, GPIO_PIN_TYPE_STD_WPD);
+
+    GPIOIntTypeSet(gpio_conf->GPIOPortBase,gpio_conf->GPIOPin,GPIO_RISING_EDGE);
+    GPIOIntRegister(gpio_conf->GPIOPortBase,GPIOA_ISP_Handler);
+    GPIOIntEnable(gpio_conf->GPIOPortBase, gpio_conf->GPIOPin);
+
+    /* Save MPU enum */
+    gpio_conf->mpu = mpu;
+    /* Store callback */
+    gpio_conf->cb = callback;
+
+    /* Successful configuration */
+    ret = 0;
+
+end_mpu6050_configint:
     return ret;
 }
 
@@ -393,6 +495,30 @@ static void ApplyGyroOffset(gyro_t offset, gyro_t *gyro)
     }
 }
 
+static void GPIOA_ISP_Handler(void)
+{
+    uint32_t status = GPIOIntStatus(GPIO_PORTA_BASE,true);
+    GPIOIntClear(GPIO_PORTA_BASE,status);
+
+    for (size_t i = 0; i < (sizeof(gpio_configurations)/sizeof(tMPU6050_GPIOInt)); i++)
+    {
+        const tGPIO_Conf *gpio_conf = &gpio_configurations[i].conf;
+        if ((status & gpio_conf->GPIOPinInt) == gpio_conf->GPIOPinInt)
+        {
+            uint32_t stGpio = GPIOPinRead(gpio_conf->GPIOPortBase, gpio_conf->GPIOPinInt);
+            /* Interrupt Should be trigger in HIGH Level */
+            if ((stGpio & gpio_conf->GPIOPinInt) != 0)
+            {
+                if (gpio_conf->cb != NULL)
+                {
+                    /* Trigger configured callback */
+                    gpio_conf->cb(gpio_conf->mpu);
+                }
+            }
+        }
+    }
+}
+
 inline static tMPU6050_Conf *GetMPU6050Conf(eMPU6050_BASE mpu)
 {
     tMPU6050_Conf *mpu_conf = NULL;
@@ -406,4 +532,19 @@ inline static tMPU6050_Conf *GetMPU6050Conf(eMPU6050_BASE mpu)
         }
     }
     return mpu_conf;
+}
+
+inline static tGPIO_Conf *GetGPIOConf(eMPU6050_GPIOInt gpio)
+{
+    tGPIO_Conf *gpio_conf = NULL;
+    /* Search for I2C configuration */
+    for (uint8_t i = 0; i < sizeof(gpio_configurations) / sizeof(tGPIO_Conf); i++)
+    {
+        if (gpio_configurations[i].gpio == gpio)
+        {
+            gpio_conf = &gpio_configurations[i].conf;
+            break;
+        }
+    }
+    return gpio_conf;
 }
