@@ -63,8 +63,8 @@ int main()
     UART_Enable(UART0, 115200);
 
     /* Start Program */
-    INFO("Start %s", PROGRAM_NAME);
-    INFO("Version: %u.%u.%u.%d", MAJOR_VERSION, MINOR_VERSION, RELEASE_VERSION, __INT_TIMESTAMP__);
+    LOG_UART("Start %s", PROGRAM_NAME);
+    LOG_UART("Version: %u.%u.%u.%d", MAJOR_VERSION, MINOR_VERSION, RELEASE_VERSION, __INT_TIMESTAMP__);
 
     /* Initialize LEDs */
     LED_Enable();
