@@ -22,7 +22,7 @@
 
 static void MPU6050_DataReady_Cb(eMPU6050_BASE mpu);
 
-static SemaphoreHandle_t xIMUDataReadySemaphore = NULL;
+static SemaphoreHandle_t xIMUDataReadySem[2] = { NULL };
 
 void vMPU6050Task(void *pvParameters)
 {
@@ -58,9 +58,9 @@ void vMPU6050Task(void *pvParameters)
     }
 
     /* Attempt to create a semaphore. */
-    if (xIMUDataReadySemaphore == NULL)
+    if (xIMUDataReadySem[taskParam.mpu] == NULL)
     {
-        xIMUDataReadySemaphore = xSemaphoreCreateBinary();
+        xIMUDataReadySem[taskParam.mpu] = xSemaphoreCreateBinary();
     }
 
     /* Timer initialization */
@@ -68,7 +68,7 @@ void vMPU6050Task(void *pvParameters)
     for (;;)
     {
         /* Wait IMU Data to be ready */
-        if (xSemaphoreTake(xIMUDataReadySemaphore, (10/portTICK_RATE_MS)) != pdTRUE)
+        if (xSemaphoreTake(xIMUDataReadySem[taskParam.mpu], (10/portTICK_RATE_MS)) != pdTRUE)
         {
             WARN("IMU Data not Ready!");
         }
@@ -124,8 +124,8 @@ end_mpu6050_task:
 static void MPU6050_DataReady_Cb(eMPU6050_BASE mpu)
 {
     /* Check if the semaphore is initialized */
-    if (xIMUDataReadySemaphore != NULL)
+    if (xIMUDataReadySem[mpu] != NULL)
     {
-        xSemaphoreGiveFromISR(xIMUDataReadySemaphore, NULL);
+        xSemaphoreGiveFromISR(xIMUDataReadySem[mpu], NULL);
     }
 }
