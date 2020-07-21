@@ -68,9 +68,9 @@ void vMPU6050Task(void *pvParameters)
     for (;;)
     {
         /* Wait IMU Data to be ready */
-        if (xSemaphoreTake(xIMUDataReadySem[taskParam.mpu], (10/portTICK_RATE_MS)) != pdTRUE)
+        if (xSemaphoreTake(xIMUDataReadySem[taskParam.mpu], (IMU_SAMPLE_RATE/10)) != pdTRUE)
         {
-            WARN("IMU Data not Ready!");
+            WARN("[%s] IMU Data not Ready!", taskParam.name);
         }
 
         /* Lock IMU mutex */
