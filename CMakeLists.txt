@@ -18,6 +18,17 @@ execute_process (
 )
 string(STRIP ${COMMIT_HASH} COMMIT_HASH)
 
+execute_process (
+    COMMAND bash -c "if ! $(git diff-index --quiet HEAD); then echo \"+\"; else echo \"\"; fi"
+    OUTPUT_VARIABLE LOCAL_DIRTY
+)
+string(STRIP ${LOCAL_DIRTY} LOCAL_DIRTY)
+
+# Add git short commit hash macro
+add_definitions(-DCOMMIT_HASH="${COMMIT_HASH}")
+# Add a mark when there is local changes not committed
+add_definitions(-DLOCAL_DIRTY="${LOCAL_DIRTY}")
+
 # define objcopy macro
 macro(OBJCOPY_FILE EXE_NAME)
     set(FO ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${EXE_NAME}.bin)
@@ -73,9 +84,6 @@ if(CMAKE_CROSSCOMPILING)
     target_link_libraries(${PROJECT_NAME}
         freertos
     )
-
-    # Add git short commit hash macro
-    add_definitions(-DCOMMIT_HASH="${COMMIT_HASH}")
 
     # set the objcopy for binary file
     objcopy_file(${PROJECT_NAME})
