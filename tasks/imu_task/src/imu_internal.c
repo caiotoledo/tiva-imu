@@ -8,16 +8,6 @@
 #include "imu_types.h"
 #include "imu_internal.h"
 
-/* TODO: Move this dependencies to another library */
-#include "inc/hw_types.h"
-#include "inc/hw_gpio.h"
-#include "inc/hw_memmap.h"
-#include "inc/hw_sysctl.h"
-#include "driverlib/gpio.h"
-#include "driverlib/rom.h"
-#include "driverlib/sysctl.h"
-#include "driverlib/pin_map.h"
-
 #define IMU_SAMPLE_RATE         (1000/portTICK_RATE_MS)
 
 static void MPU6050_DataReady_Cb(eMPU6050_BASE mpu);
