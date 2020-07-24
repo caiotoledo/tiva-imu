@@ -10,6 +10,7 @@
 
 #define IMU_SAMPLE_RATE         (1000/portTICK_RATE_MS)
 
+static int MPU6050_SampleImuData(eMPU6050_BASE mpu, dataIMU_t *data);
 static void MPU6050_DataReady_Cb(eMPU6050_BASE mpu);
 
 static SemaphoreHandle_t xIMUDataReadySem[2] = { NULL };
@@ -66,17 +67,9 @@ void vMPU6050Task(void *pvParameters)
         /* Lock IMU mutex */
         xSemaphoreTake(mtxIMU, portMAX_DELAY);
 
-        /* Store sample time in ms */
-        uint32_t time_ms = GetMillis();
-        /* Sample Accelerometer */
-        accel_t accel;
-        ret += MPU6050_ReadAllAccel(taskParam.mpu, &accel);
-        /* Sample Gyroscope */
-        gyro_t gyro;
-        ret += MPU6050_ReadAllGyro(taskParam.mpu, &gyro);
-        /* Sample Temperature */
-        double temp;
-        ret += MPU6050_ReadTemperature(taskParam.mpu, &temp);
+        dataIMU_t dataimu = { 0 };
+        dataimu.imu = taskParam.name;
+        MPU6050_SampleImuData(taskParam.mpu, &dataimu);
 
         /* Release IMU mutex */
         xSemaphoreGive(mtxIMU);
@@ -84,14 +77,6 @@ void vMPU6050Task(void *pvParameters)
         /* Check if the data was successful sample */
         if (ret == 0)
         {
-            /* Store IMU Data */
-            dataIMU_t dataimu = {
-                .imu = taskParam.name,
-                .ms = time_ms,
-                .accel = accel,
-                .gyro = gyro,
-                .temperature = temp,
-            };
             /* Send IMU data via queue */
             if (xQueueSend(taskParam.queue, (void *)&dataimu, portMAX_DELAY) != pdTRUE)
             {
@@ -107,8 +92,30 @@ void vMPU6050Task(void *pvParameters)
     }
 
 end_mpu6050_task:
-    ERROR("Suspend %s Task!", taskParam.name);
+    ERROR("Suspend [%s] Task!", taskParam.name);
     vTaskSuspend(NULL);
+}
+
+static int MPU6050_SampleImuData(eMPU6050_BASE mpu, dataIMU_t *data)
+{
+    int ret = 0;
+
+    /* Check invalid pointer */
+    if (data == NULL)
+    {
+        return -1;
+    }
+
+    /* Store sample time in ms */
+    data->ms = GetMillis();
+    /* Sample Accelerometer */
+    ret += MPU6050_ReadAllAccel(mpu, &data->accel);
+    /* Sample Gyroscope */
+    ret += MPU6050_ReadAllGyro(mpu, &data->gyro);
+    /* Sample Temperature */
+    ret += MPU6050_ReadTemperature(mpu, &data->temperature);
+
+    return ret;
 }
 
 static void MPU6050_DataReady_Cb(eMPU6050_BASE mpu)
