@@ -14,20 +14,25 @@ set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O0")
 # Retrieve current commit hash
 execute_process (
     COMMAND git rev-parse --short HEAD
+    RESULT_VARIABLE STATUS_CMD
     OUTPUT_VARIABLE COMMIT_HASH
 )
-string(STRIP ${COMMIT_HASH} COMMIT_HASH)
+if(${STATUS_CMD} EQUAL 0)
+    string(STRIP ${COMMIT_HASH} COMMIT_HASH)
+    # Add git short commit hash macro
+    add_definitions(-DCOMMIT_HASH="${COMMIT_HASH}")
+endif()
 
 execute_process (
     COMMAND bash -c "if ! $(git diff-index --quiet HEAD); then echo \"+\"; else echo \"\"; fi"
+    RESULT_VARIABLE STATUS_CMD
     OUTPUT_VARIABLE LOCAL_DIRTY
 )
-string(STRIP ${LOCAL_DIRTY} LOCAL_DIRTY)
-
-# Add git short commit hash macro
-add_definitions(-DCOMMIT_HASH="${COMMIT_HASH}")
-# Add a mark when there is local changes not committed
-add_definitions(-DLOCAL_DIRTY="${LOCAL_DIRTY}")
+if(${STATUS_CMD} EQUAL 0)
+    string(STRIP ${LOCAL_DIRTY} LOCAL_DIRTY)
+    # Add a mark when there is local changes not committed
+    add_definitions(-DLOCAL_DIRTY="${LOCAL_DIRTY}")
+endif()
 
 # define objcopy macro
 macro(OBJCOPY_FILE EXE_NAME)
