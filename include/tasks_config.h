@@ -17,7 +17,5 @@
 /* IMU task configuration */
 #define TASK_IMU_PRIORITY       TASK_PRIORITY(TASK_IMULOG_PRIORITY+1)
 #define TASK_IMU_STACKSIZE      (configMINIMAL_STACK_SIZE)
-/* MPU6050 task timer configuration */
-#define TASK_MPU6050_PERIOD     (1000/portTICK_RATE_MS)
 
 #endif /* TASKS_CONFIG_H_ */
