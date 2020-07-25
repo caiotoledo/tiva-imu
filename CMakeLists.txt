@@ -72,6 +72,7 @@ if(CMAKE_CROSSCOMPILING)
     target_link_libraries(${PROJECT_NAME}
         led_task
         imu_task
+        cmd_task
     )
 
     # Add local library:

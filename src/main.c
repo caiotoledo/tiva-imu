@@ -28,6 +28,7 @@
 
 #include <tasks_config.h>
 #include <led_task.h>
+#include <cmd_task.h>
 #include <imu_task.h>
 
 #define PROGRAM_NAME            "tiva-imu"
@@ -55,6 +56,12 @@ static void vFaultFunc(void)
     while (1);
 }
 
+static void showVersion (stCommandParam param)
+{
+    UNUSED(param);
+    LOG_UART("Version: %u.%u.%u-%d git@%s%s", MAJOR_VERSION, MINOR_VERSION, RELEASE_VERSION, __INT_TIMESTAMP__, COMMIT_HASH, LOCAL_DIRTY);
+}
+
 int main()
 {
     SysCtlClockSet(SYSCTL_SYSDIV_4 | SYSCTL_USE_PLL | SYSCTL_XTAL_16MHZ | SYSCTL_OSC_MAIN);
@@ -66,10 +73,19 @@ int main()
     LOG_UART("Start %s", PROGRAM_NAME);
     LOG_UART("Version: %u.%u.%u-%d git@%s%s\n", MAJOR_VERSION, MINOR_VERSION, RELEASE_VERSION, __INT_TIMESTAMP__, COMMIT_HASH, LOCAL_DIRTY);
 
+    /* Register Command Functions */
+    CMD_RegFunc("version", showVersion);
+    CMD_RegFunc("ver", showVersion);
+
     /* Initialize LEDs */
     LED_Enable();
 
     if (xTaskCreate(vLedTask, "LED Task", TASK_LED_STACKSIZE, NULL, TASK_LED_PRIORITY, NULL) != pdPASS)
+    {
+        vFaultFunc();
+    }
+
+    if (xTaskCreate(vCMDTask, "CMD Task", TASK_CMD_STACKSIZE, NULL, TASK_CMD_PRIORITY, NULL) != pdPASS)
     {
         vFaultFunc();
     }

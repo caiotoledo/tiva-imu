@@ -5,8 +5,11 @@
 #define TASK_PRIORITY(x)        (x > configMAX_PRIORITIES ? configMAX_PRIORITIES : x)
 
 /* CONFIGURATION TASKS */
+/* CMD task configuration */
+#define TASK_CMD_PRIORITY       TASK_PRIORITY(tskIDLE_PRIORITY)
+#define TASK_CMD_STACKSIZE      (configMINIMAL_STACK_SIZE)
 /* Led task configuration */
-#define TASK_LED_PRIORITY       TASK_PRIORITY(tskIDLE_PRIORITY)
+#define TASK_LED_PRIORITY       TASK_PRIORITY(TASK_CMD_PRIORITY+1)
 #define TASK_LED_STACKSIZE      (configMINIMAL_STACK_SIZE)
 /* IMU Log task configuration */
 #define TASK_IMULOG_PRIORITY    TASK_PRIORITY(TASK_LED_PRIORITY+1)
