@@ -81,6 +81,52 @@ void UART_Enable(eUART_BASE uart, uint32_t baudrate)
     UARTStdioConfig(0, baudrate, 16000000);
 }
 
+int UART_GetLine(char *str, size_t *size)
+{
+    /* Verify pointers */
+    if ((str == NULL) || (size == NULL))
+    {
+        return -1;
+    }
+
+    int ret = 0;
+    bool hasSpace = true;
+    size_t index = 0;
+    while (true)
+    {
+        /* Get a single char */
+        char c = UARTgetc();
+
+        /* Stop when received new line and carrier return */
+        if ((c == '\n') || (c == '\r'))
+        {
+            str[index++] = '\0'; /* Add a NULL terminator at the end of the string */
+            break;
+        }
+
+        if (hasSpace)
+        {
+            /* Store new char and add a NULL terminator */
+            str[index++] = c;
+
+            /* Check if there is enough size */
+            if (index == ((*size)-1))
+            {
+                hasSpace = false;
+            }
+        }
+        else
+        {
+            ret = -1;
+        }
+    };
+
+    /* Store size */
+    (*size) = index;
+
+    return ret;
+}
+
 static const tUART_Pin_Conf *GetUARTConf(eUART_BASE uart)
 {
     const tUART_Pin_Conf *uart_pin_conf = 0U;
