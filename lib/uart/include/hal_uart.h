@@ -1,11 +1,6 @@
 #ifndef HAL_UART_H_
 #define HAL_UART_H_
 
-/**
- * @brief Enable UART asynchronous
- * 
- */
-#define UART_BUFFERED
 #include "utils/uartstdio.h"
 
 /**
