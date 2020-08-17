@@ -6,35 +6,33 @@
 
 #include <FreeRTOS.h>
 #include <task.h>
+#include <FreeRTOS_CLI.h>
 
 #include "cmd_task.h"
-#include "cmd_internal.h"
 
 void vCMDTask(void *pvParameters)
 {
   INFO("Start [%s]", __func__);
 
-  char buf[128] = { 0 };
+  char outputBuffer[128] = { 0 };
+  char inputBuffer[128] = { 0 };
   for (;;)
   {
-    size_t size = sizeof(buf);
-    int ret = UART_GetLine(buf, &size);
+    size_t size = sizeof(inputBuffer);
+    int ret = UART_GetLine(inputBuffer, &size);
 
-    if (ret == 0)
+    if ((ret == 0) && (size > 0))
     {
-      stCommandParam param;
-      vFuncCommand func;
-      int retParser = parseCmd(buf, &func, &param);
+      BaseType_t xReturned;
+      do
+      {
+        /* Get the next output string from the command interpreter. */
+        xReturned = FreeRTOS_CLIProcessCommand( inputBuffer, outputBuffer, sizeof(outputBuffer) );
 
-      if (retParser == 0)
-      {
-        INFO("Execute Command [%s]", buf);
-        func(param);
-      }
-      else
-      {
-        WARN("Command not found [%s]", buf);
-      }
+        /* Write the generated string to the UART. */
+        UARTprintf(outputBuffer);
+
+      } while( xReturned != pdFALSE );
     }
   }
 
@@ -43,7 +41,15 @@ void vCMDTask(void *pvParameters)
   vTaskSuspend(NULL);
 }
 
-int CMD_RegFunc(const char *cmd, vFuncCommand func)
+int CMD_RegFuncCommand(const CLI_Command_Definition_t *pxCommandToRegister)
 {
-  return regFunc(cmd, func);
+  int ret = 0;
+
+  if (FreeRTOS_CLIRegisterCommand( pxCommandToRegister ) != pdPASS)
+  {
+    ERROR("Not enough Heap Memory!");
+    ret = -1;
+  }
+
+  return ret;
 }

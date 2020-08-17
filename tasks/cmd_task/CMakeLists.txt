@@ -13,3 +13,4 @@ add_library(${PROJECT_NAME} STATIC ${src_files})
 target_include_directories(${PROJECT_NAME} INTERFACE ${PROJECT_SOURCE_DIR}/include)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE uart freertos)
+target_link_libraries(${PROJECT_NAME} PUBLIC freertos-cli)

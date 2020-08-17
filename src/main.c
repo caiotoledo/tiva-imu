@@ -35,6 +35,31 @@
 
 #define UNUSED(x)               ((void)x)
 
+static BaseType_t VersionProgramCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString );
+
+static const CLI_Command_Definition_t xVersionProgram =
+{
+    "ver", /* The command string. */
+    "ver:\r\n Show program version\r\n", /* Help string. */
+    VersionProgramCommand, /* The function to run. */
+    0 /* No parameters are expected. */
+};
+
+static BaseType_t VersionProgramCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString )
+{
+    UNUSED(pcCommandString);
+
+    LOG_UART("Version: %u.%u.%u-%d git@%s%s", MAJOR_VERSION, MINOR_VERSION, RELEASE_VERSION, __INT_TIMESTAMP__, COMMIT_HASH, LOCAL_DIRTY);
+
+    /* Do not use the pcWriteBuffer to output on console */
+    if (xWriteBufferLen >= 1)
+    {
+        pcWriteBuffer[0] = '\0';
+    }
+
+    return pdFALSE;
+}
+
 void vApplicationStackOverflowHook(TaskHandle_t xTask, signed char *pcTaskName)
 {
     UNUSED(pcTaskName);
@@ -56,12 +81,6 @@ static void vFaultFunc(void)
     while (1);
 }
 
-static void showVersion (stCommandParam param)
-{
-    UNUSED(param);
-    LOG_UART("Version: %u.%u.%u-%d git@%s%s", MAJOR_VERSION, MINOR_VERSION, RELEASE_VERSION, __INT_TIMESTAMP__, COMMIT_HASH, LOCAL_DIRTY);
-}
-
 int main()
 {
     SysCtlClockSet(SYSCTL_SYSDIV_4 | SYSCTL_USE_PLL | SYSCTL_XTAL_16MHZ | SYSCTL_OSC_MAIN);
@@ -74,8 +93,7 @@ int main()
     LOG_UART("Version: %u.%u.%u-%d git@%s%s\n", MAJOR_VERSION, MINOR_VERSION, RELEASE_VERSION, __INT_TIMESTAMP__, COMMIT_HASH, LOCAL_DIRTY);
 
     /* Register Command Functions */
-    CMD_RegFunc("version", showVersion);
-    CMD_RegFunc("ver", showVersion);
+    CMD_RegFuncCommand(&xVersionProgram);
 
     /* Initialize LEDs */
     LED_Enable();
