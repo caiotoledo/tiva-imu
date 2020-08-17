@@ -11,6 +11,8 @@
 #include <FreeRTOS.h>
 #include <timers.h>
 
+#include <cmd_task.h>
+
 #define RGB_RAINBOW_STEP_MAX            (500U)
 #define RGB_RAINBOW_STEP_MIN            (0U)
 #define RGB_RAINBOW_STEP_INITIAL        RGB_RAINBOW_STEP_MIN
@@ -19,18 +21,32 @@
 #define RGB_TASK_DELAY                  (150/portTICK_RATE_MS)
 
 #define MIN(a,b)                        ((a > b) ? b : a)
+#define MAX(a,b)                        ((a > b) ? a : b)
 
 typedef enum {
     INCREMENT,
     DECREMENT,
 } eStepOperation;
 
+static int SetRGBFreq(int value);
 static bool ApplyRGBStep(uint16_t *color, uint32_t step, eStepOperation op);
 static void vStateMachineRainbowRGB(uint32_t rgbStep);
+static BaseType_t RGBFreqCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString );
+
+static uint32_t RGBRainbowStep = RGB_RAINBOW_STEP_INITIAL;
+
+static const CLI_Command_Definition_t xRGBFreq =
+{
+    "rgb-freq", /* The command string. */
+    "rgb-freq [value]:\r\n Configure RGB Frequency\r\n", /* Help string. */
+    RGBFreqCommand, /* The function to run. */
+    1 /* No parameters are expected. */
+};
 
 void vLedTask(void *pvParameters)
 {
-    uint32_t RGBRainbowStep = RGB_RAINBOW_STEP_INITIAL;
+    /* Register LED Commands */
+    CMD_RegFuncCommand(&xRGBFreq);
 
     /* Initialize button API */
     Button_Enable(GetMillisFromISR);
@@ -76,6 +92,68 @@ void vLedTask(void *pvParameters)
         /* Task sleep */
         vTaskDelay(RGB_TASK_DELAY);
     }
+}
+
+static BaseType_t RGBFreqCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString )
+{
+    const char *pcParameter;
+    BaseType_t lParameterStringLength;
+
+    /* Obtain the parameter string. */
+    pcParameter = FreeRTOS_CLIGetParameter (
+        pcCommandString,        /* The command string itself. */
+        1,                      /* Return the first parameter. */
+        &lParameterStringLength /* Store the parameter string length. */
+    );
+
+    /* Convert String to Integer */
+    int value = 0;
+    for (size_t i = 0; pcParameter[i] != '\0'; i++)
+    {
+        value = value * 10 + pcParameter[i] - '0';
+    }
+
+    /* Update frequency value */
+    if (SetRGBFreq(value) == 0U)
+    {
+        LOG_UART("Update RGB Frequency value [%u]", value);
+    }
+    else
+    {
+        LOG_UART("Invalid value -> MIN[%u] ~ MAX[%u]", RGB_RAINBOW_STEP_MIN, RGB_RAINBOW_STEP_MAX);
+    }
+
+    /* Do not use the pcWriteBuffer to output on console */
+    if (xWriteBufferLen >= 1)
+    {
+        pcWriteBuffer[0] = '\0';
+    }
+
+    return pdFALSE;
+}
+
+/**
+ * @brief Update RGB Frequency
+ * 
+ * @param value New value
+ * @return int Returns 0 for valid values
+ */
+static int SetRGBFreq(int value)
+{
+    int ret = -1;
+    int local_value = value;
+
+    /* Check value bounds */
+    local_value = MAX(local_value, RGB_RAINBOW_STEP_MIN);
+    local_value = MIN(local_value, RGB_RAINBOW_STEP_MAX);
+
+    if (local_value == value)
+    {
+        RGBRainbowStep = value;
+        ret = 0;
+    }
+
+    return ret;
 }
 
 /**
