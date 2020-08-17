@@ -36,12 +36,21 @@
 #define UNUSED(x)               ((void)x)
 
 static BaseType_t VersionProgramCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString );
+static BaseType_t ResetMCUCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString );
 
 static const CLI_Command_Definition_t xVersionProgram =
 {
     "ver", /* The command string. */
     "ver:\r\n Show program version\r\n", /* Help string. */
     VersionProgramCommand, /* The function to run. */
+    0 /* No parameters are expected. */
+};
+
+static const CLI_Command_Definition_t xResetMCU =
+{
+    "reset", /* The command string. */
+    "reset:\r\n Reset System\r\n", /* Help string. */
+    ResetMCUCommand, /* The function to run. */
     0 /* No parameters are expected. */
 };
 
@@ -58,6 +67,20 @@ static BaseType_t VersionProgramCommand( char *pcWriteBuffer, size_t xWriteBuffe
     }
 
     return pdFALSE;
+}
+
+static BaseType_t ResetMCUCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString )
+{
+    UNUSED(pcCommandString);
+
+    /* Delay for 100 ms - Wait devices to clear up their buffers */
+    vTaskDelay(100/portTICK_RATE_MS);
+
+    /* Reset the system */
+    MCU_SoftwareReset();
+
+    /* Should not reach this point */
+    return pdTRUE;
 }
 
 void vApplicationStackOverflowHook(TaskHandle_t xTask, signed char *pcTaskName)
@@ -94,6 +117,7 @@ int main()
 
     /* Register Command Functions */
     CMD_RegFuncCommand(&xVersionProgram);
+    CMD_RegFuncCommand(&xResetMCU);
 
     /* Initialize LEDs */
     LED_Enable();
