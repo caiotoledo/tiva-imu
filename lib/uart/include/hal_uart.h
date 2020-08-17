@@ -1,6 +1,7 @@
 #ifndef HAL_UART_H_
 #define HAL_UART_H_
 
+#include <stdbool.h>
 #include <string.h>
 
 #include "utils/uartstdio.h"
@@ -26,8 +27,9 @@ void UART_Enable(eUART_BASE uart, uint32_t baudrate);
  *
  * @param str Pointer buffer to store the string
  * @param size Input Size of the str buffer / Output string size received
+ * @param echo Enable or disable UART echo
  * @return int Return 0 successful
  */
-int UART_GetLine(char *str, size_t *size);
+int UART_GetLine(char *str, size_t *size, bool echo);
 
 #endif /* HAL_UART_H_ */

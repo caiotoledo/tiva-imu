@@ -81,7 +81,7 @@ void UART_Enable(eUART_BASE uart, uint32_t baudrate)
     UARTStdioConfig(0, baudrate, 16000000);
 }
 
-int UART_GetLine(char *str, size_t *size)
+int UART_GetLine(char *str, size_t *size, bool echo)
 {
     /* Verify pointers */
     if ((str == NULL) || (size == NULL))
@@ -96,6 +96,11 @@ int UART_GetLine(char *str, size_t *size)
     {
         /* Get a single char */
         char c = UARTgetc();
+        if (echo)
+        {
+            /* Echo each char received */
+            UARTwrite(&c, 1);
+        }
 
         /* Stop when received new line and carrier return */
         if ((c == '\n') || (c == '\r'))

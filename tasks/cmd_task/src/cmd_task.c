@@ -18,8 +18,10 @@ void vCMDTask(void *pvParameters)
   char inputBuffer[128] = { 0 };
   for (;;)
   {
+    UARTprintf(">> "); /* Delimiter to show that the command line is available */
     size_t size = sizeof(inputBuffer);
-    int ret = UART_GetLine(inputBuffer, &size);
+    int ret = UART_GetLine(inputBuffer, &size, true);
+    UARTprintf("\n"); /* Add a new linefeed at the end of each command echoed */
 
     if ((ret == 0) && (size > 0))
     {
