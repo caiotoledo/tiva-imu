@@ -108,7 +108,7 @@ static BaseType_t RGBFreqCommand( char *pcWriteBuffer, size_t xWriteBufferLen, c
 
     /* Convert String to Integer */
     int value = 0;
-    for (size_t i = 0; pcParameter[i] != '\0'; i++)
+    for (size_t i = 0; (pcParameter[i] != '\0' && i < lParameterStringLength); i++)
     {
         value = value * 10 + pcParameter[i] - '0';
     }
@@ -120,7 +120,7 @@ static BaseType_t RGBFreqCommand( char *pcWriteBuffer, size_t xWriteBufferLen, c
     }
     else
     {
-        LOG_UART("Invalid value -> MIN[%u] ~ MAX[%u]", RGB_RAINBOW_STEP_MIN, RGB_RAINBOW_STEP_MAX);
+        LOG_UART("Invalid value [%u] (MIN[%u] ~ MAX[%u])", value, RGB_RAINBOW_STEP_MIN, RGB_RAINBOW_STEP_MAX);
     }
 
     /* Do not use the pcWriteBuffer to output on console */
