@@ -39,8 +39,8 @@ void vCMDTask(void *pvParameters)
   }
 
   ERROR("Finish [%s]", __func__);
-  /* This task can be suspended now */
-  vTaskSuspend(NULL);
+  /* This task can be deleted now */
+  vTaskDelete(NULL);
 }
 
 int CMD_RegFuncCommand(const CLI_Command_Definition_t *pxCommandToRegister)

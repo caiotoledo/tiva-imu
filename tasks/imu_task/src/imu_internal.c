@@ -92,8 +92,8 @@ void vMPU6050Task(void *pvParameters)
     }
 
 end_mpu6050_task:
-    ERROR("Suspend [%s] Task!", taskParam.name);
-    vTaskSuspend(NULL);
+    ERROR("Delete [%s] Task!", taskParam.name);
+    vTaskDelete(NULL);
 }
 
 static int MPU6050_SampleImuData(eMPU6050_BASE mpu, dataIMU_t *data)

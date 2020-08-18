@@ -74,6 +74,6 @@ void vIMUTask(void *pvParameters)
     }
 
 end_imu_task:
-    /* This task can be suspended now */
-    vTaskSuspend(NULL);
+    /* This task can be deleted now */
+    vTaskDelete(NULL);
 }
