@@ -5,10 +5,10 @@
 extern "C" {
 	TickType_t xTaskGetTickCount(void)
 	{
-		return SingletonFreertosMock::GetInstance()->xTaskGetTickCount();
+		return SingletonEnvMock<FreeRtosMock>::GetInstance()->xTaskGetTickCount();
 	}
 	TickType_t xTaskGetTickCountFromISR(void)
 	{
-		return SingletonFreertosMock::GetInstance()->xTaskGetTickCountFromISR();
+		return SingletonEnvMock<FreeRtosMock>::GetInstance()->xTaskGetTickCountFromISR();
 	}
 }

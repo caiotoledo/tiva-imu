@@ -12,17 +12,19 @@ class FreeRtosMock {
   MOCK_METHOD0(xTaskGetTickCountFromISR, TickType_t());
 };
 
-class SingletonFreertosMock
+/* TODO: Move this definition to a generic place */
+template <typename T>
+class SingletonEnvMock
 {
 private:
-	FreeRtosMock mock;
-	SingletonFreertosMock() = default;
+	T mock;
+	SingletonEnvMock() = default;
 public:
-	static FreeRtosMock *GetInstance()
+	static T *GetInstance()
 	{
-		static SingletonFreertosMock instance;
+		static SingletonEnvMock<T> instance;
 		return &instance.mock;
 	}
 
-	~SingletonFreertosMock() = default;
+	~SingletonEnvMock() = default;
 };

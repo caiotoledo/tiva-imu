@@ -11,7 +11,7 @@ using ::testing::Return;
 
 TEST(lib_timer, SimpleCall_GetMillis)
 {
-	auto env = SingletonFreertosMock::GetInstance();
+	auto env = SingletonEnvMock<FreeRtosMock>::GetInstance();
 
 	TickType_t test_val = 10;
 	EXPECT_CALL(*env, xTaskGetTickCount())
@@ -25,7 +25,7 @@ TEST(lib_timer, SimpleCall_GetMillis)
 
 TEST(lib_timer, SimpleCall_GetMillisFromISR)
 {
-	auto env = SingletonFreertosMock::GetInstance();
+	auto env = SingletonEnvMock<FreeRtosMock>::GetInstance();
 
 	TickType_t test_val = 10;
 	EXPECT_CALL(*env, xTaskGetTickCountFromISR())
