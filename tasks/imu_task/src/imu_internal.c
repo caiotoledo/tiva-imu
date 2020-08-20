@@ -8,12 +8,17 @@
 #include "imu_types.h"
 #include "imu_internal.h"
 
-#define IMU_SAMPLE_RATE         (1000/portTICK_RATE_MS)
+#define CONVERT_MS_TO_TICKS(x)      (x/portTICK_RATE_MS)
+
+#define IMU_INITIAL_SAMPLE_RATE     (1000)
+#define IMU_MIN_SAMPLE_RATE         (10)
+#define IMU_MAX_SAMPLE_RATE         (10000)
 
 static int MPU6050_SampleImuData(eMPU6050_BASE mpu, dataIMU_t *data);
 static void MPU6050_DataReady_Cb(eMPU6050_BASE mpu);
 
 static SemaphoreHandle_t xIMUDataReadySem[2] = { NULL };
+static uint32_t u32SampleRate = CONVERT_MS_TO_TICKS(IMU_INITIAL_SAMPLE_RATE);
 
 void vMPU6050Task(void *pvParameters)
 {
@@ -59,7 +64,7 @@ void vMPU6050Task(void *pvParameters)
     for (;;)
     {
         /* Wait IMU Data to be ready */
-        if (xSemaphoreTake(xIMUDataReadySem[taskParam->mpu], (IMU_SAMPLE_RATE/10)) != pdTRUE)
+        if (xSemaphoreTake(xIMUDataReadySem[taskParam->mpu], (u32SampleRate/10)) != pdTRUE)
         {
             WARN("[%s] IMU Data not Ready!", taskParam->name);
         }
@@ -88,13 +93,26 @@ void vMPU6050Task(void *pvParameters)
             ERROR("Error IMU Read!");
         }
 
-        vTaskDelayUntil(&taskParam->xLastWakeTime, (TickType_t)IMU_SAMPLE_RATE);
+        vTaskDelayUntil(&taskParam->xLastWakeTime, (TickType_t)u32SampleRate);
     }
 
 end_mpu6050_task:
     taskParam->taskHandler = NULL;
     ERROR("Delete [%s] Task!", taskParam->name);
     vTaskDelete(NULL);
+}
+
+int MPU6050Task_SetSampleRate(uint32_t sample_rate)
+{
+    int ret = -1;
+
+    if ((sample_rate >= IMU_MIN_SAMPLE_RATE) && (sample_rate <= IMU_MAX_SAMPLE_RATE))
+    {
+        u32SampleRate = CONVERT_MS_TO_TICKS(sample_rate);
+        ret = 0;
+    }
+
+    return ret;
 }
 
 static int MPU6050_SampleImuData(eMPU6050_BASE mpu, dataIMU_t *data)
