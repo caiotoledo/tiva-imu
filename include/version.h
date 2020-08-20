@@ -1,9 +1,9 @@
 #ifndef VERSION_H
 #define VERSION_H
 
-#define MAJOR_VERSION         0
-#define MINOR_VERSION         0
-#define RELEASE_VERSION       0
+#define MAJOR_VERSION         (0U)
+#define MINOR_VERSION         (1U)
+#define RELEASE_VERSION       (0U)
 
 /* If no external macro was provided, define an empty string */
 #ifndef COMMIT_HASH
