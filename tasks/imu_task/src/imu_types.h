@@ -22,6 +22,8 @@ typedef struct
     eI2C_BASE i2c;
     eMPU6050_GPIOInt gpio_int;
     QueueHandle_t queue;
+    TaskHandle_t taskHandler;
+    TickType_t xLastWakeTime;
 } imuTaskConfig_t;
 
 #endif /* IMU_TYPES_H_ */

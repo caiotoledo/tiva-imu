@@ -19,7 +19,7 @@ void vMPU6050Task(void *pvParameters)
 {
     int ret = 0;
 
-    imuTaskConfig_t taskParam = *(( imuTaskConfig_t * ) pvParameters);
+    imuTaskConfig_t *taskParam = (( imuTaskConfig_t * ) pvParameters);
 
     /* Initialize the Mutex for this task only once */
     static SemaphoreHandle_t mtxIMU = NULL;
@@ -30,9 +30,9 @@ void vMPU6050Task(void *pvParameters)
 
     /* Lock IMU mutex */
     xSemaphoreTake(mtxIMU, portMAX_DELAY);
-    if (MPU6050_Enable(taskParam.mpu, taskParam.i2c, GetMillis) != 0)
+    if (MPU6050_Enable(taskParam->mpu, taskParam->i2c, GetMillis) != 0)
     {
-        ERROR("[%s] Enable Error!", taskParam.name);
+        ERROR("[%s] Enable Error!", taskParam->name);
         /* Release IMU mutex */
         xSemaphoreGive(mtxIMU);
         goto end_mpu6050_task;
@@ -41,35 +41,35 @@ void vMPU6050Task(void *pvParameters)
     xSemaphoreGive(mtxIMU);
 
     /* Initialize the Interrupt GPIO */
-    int retGpioInt = MPU6050_ConfigInterrupt(taskParam.mpu, taskParam.gpio_int, MPU6050_DataReady_Cb);
+    int retGpioInt = MPU6050_ConfigInterrupt(taskParam->mpu, taskParam->gpio_int, MPU6050_DataReady_Cb);
     if (retGpioInt != 0)
     {
-        ERROR("[%s] Interrupt Configuration Error!", taskParam.name);
+        ERROR("[%s] Interrupt Configuration Error!", taskParam->name);
         goto end_mpu6050_task;
     }
 
     /* Attempt to create a semaphore. */
-    if (xIMUDataReadySem[taskParam.mpu] == NULL)
+    if (xIMUDataReadySem[taskParam->mpu] == NULL)
     {
-        xIMUDataReadySem[taskParam.mpu] = xSemaphoreCreateBinary();
+        xIMUDataReadySem[taskParam->mpu] = xSemaphoreCreateBinary();
     }
 
     /* Timer initialization */
-    TickType_t xLastWakeTime = xTaskGetTickCount();
+    taskParam->xLastWakeTime = xTaskGetTickCount();
     for (;;)
     {
         /* Wait IMU Data to be ready */
-        if (xSemaphoreTake(xIMUDataReadySem[taskParam.mpu], (IMU_SAMPLE_RATE/10)) != pdTRUE)
+        if (xSemaphoreTake(xIMUDataReadySem[taskParam->mpu], (IMU_SAMPLE_RATE/10)) != pdTRUE)
         {
-            WARN("[%s] IMU Data not Ready!", taskParam.name);
+            WARN("[%s] IMU Data not Ready!", taskParam->name);
         }
 
         /* Lock IMU mutex */
         xSemaphoreTake(mtxIMU, portMAX_DELAY);
 
         dataIMU_t dataimu = { 0 };
-        dataimu.imu = taskParam.name;
-        MPU6050_SampleImuData(taskParam.mpu, &dataimu);
+        dataimu.imu = taskParam->name;
+        MPU6050_SampleImuData(taskParam->mpu, &dataimu);
 
         /* Release IMU mutex */
         xSemaphoreGive(mtxIMU);
@@ -78,7 +78,7 @@ void vMPU6050Task(void *pvParameters)
         if (ret == 0)
         {
             /* Send IMU data via queue */
-            if (xQueueSend(taskParam.queue, (void *)&dataimu, portMAX_DELAY) != pdTRUE)
+            if (xQueueSend(taskParam->queue, (void *)&dataimu, portMAX_DELAY) != pdTRUE)
             {
                 ERROR("Full queue!");
             }
@@ -88,11 +88,12 @@ void vMPU6050Task(void *pvParameters)
             ERROR("Error IMU Read!");
         }
 
-        vTaskDelayUntil(&xLastWakeTime, (TickType_t)IMU_SAMPLE_RATE);
+        vTaskDelayUntil(&taskParam->xLastWakeTime, (TickType_t)IMU_SAMPLE_RATE);
     }
 
 end_mpu6050_task:
-    ERROR("Delete [%s] Task!", taskParam.name);
+    taskParam->taskHandler = NULL;
+    ERROR("Delete [%s] Task!", taskParam->name);
     vTaskDelete(NULL);
 }
 
