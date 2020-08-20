@@ -5,8 +5,6 @@
 
 #include <log.h>
 
-#include <cmd_task.h>
-
 #include <FreeRTOS.h>
 #include <task.h>
 #include <queue.h>
@@ -17,29 +15,10 @@
 #include "imu_task.h"
 #include "imu_internal.h"
 #include "imu_logger.h"
+#include "imu_cmd.h"
 
 /* Size of Queue IMU for data logging */
 #define QUEUE_IMU_LENGTH    (10U)
-
-static BaseType_t IMURunCommand (char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString);
-static BaseType_t IMUSampleCommand (char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString);
-static void ManageMPU6050Tasks(bool start);
-
-static const CLI_Command_Definition_t xIMURun =
-{
-    "imu-run", /* The command string. */
-    "imu-run [time]:\r\n Run the IMU sample for [time] seconds\r\n", /* Help string. */
-    IMURunCommand, /* The function to run. */
-    1 /* No parameters are expected. */
-};
-
-static const CLI_Command_Definition_t xIMUSample =
-{
-    "imu-sample", /* The command string. */
-    "imu-sample [period]:\r\n Configure IMU [period] sample rate in milliseconds\r\n", /* Help string. */
-    IMUSampleCommand, /* The function to run. */
-    1 /* No parameters are expected. */
-};
 
 static imuTaskConfig_t taskConfig[] =
 {
@@ -104,94 +83,14 @@ void vIMUTask(void *pvParameters)
     ManageMPU6050Tasks(false);
 
     /* Register IMU Commands */
-    CMD_RegFuncCommand(&xIMURun);
-    CMD_RegFuncCommand(&xIMUSample);
+    vIMU_ConfigureCommands();
 
 end_imu_task:
     /* This task can be deleted now */
     vTaskDelete(NULL);
 }
 
-static BaseType_t IMURunCommand (char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString)
-{
-    const char *pcTime;
-    BaseType_t lTimeLength;
-
-    /* Get time value */
-    pcTime = FreeRTOS_CLIGetParameter (
-        pcCommandString,
-        1,
-        &lTimeLength
-    );
-
-    /* Convert String to Integer */
-    uint32_t time = 0;
-    for (size_t i = 0; (pcTime[i] != '\0' && i < lTimeLength); i++)
-    {
-        time = time * 10 + pcTime[i] - '0';
-    }
-
-    /* Start and Stop MPU6050 Task */
-    ManageMPU6050Tasks(false);
-    INFO("Resume MPU6050 tasks for [%u] seconds", time);
-    ManageMPU6050Tasks(true);
-    vTaskDelay((time*1000U)/portTICK_RATE_MS);
-    ManageMPU6050Tasks(false);
-
-    /* Do not use the pcWriteBuffer to output on console */
-    if (xWriteBufferLen >= 1)
-    {
-        pcWriteBuffer[0] = '\0';
-    }
-
-    return pdFALSE;
-}
-
-static BaseType_t IMUSampleCommand (char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString)
-{
-    const char *pcTime;
-    BaseType_t lTimeLength;
-
-    /* Get time value */
-    pcTime = FreeRTOS_CLIGetParameter (
-        pcCommandString,
-        1,
-        &lTimeLength
-    );
-
-    /* Convert String to Integer */
-    uint32_t time = 0;
-    for (size_t i = 0; (pcTime[i] != '\0' && i < lTimeLength); i++)
-    {
-        time = time * 10 + pcTime[i] - '0';
-    }
-
-    /* Update sample rate */
-    int ret = MPU6050Task_SetSampleRate(time);
-    if (ret == 0)
-    {
-        INFO("Update imu sample period [%u] ms", time);
-    }
-    else
-    {
-        ERROR("INVALID imu sample period [%u] ms", time);
-    }
-
-    /* Do not use the pcWriteBuffer to output on console */
-    if (xWriteBufferLen >= 1)
-    {
-        pcWriteBuffer[0] = '\0';
-    }
-
-    return pdFALSE;
-}
-
-/**
- * @brief Start or Stop MPU6050 Tasks
- *
- * @param start Start Tasks if True, otherwise Stop Tasks
- */
-static void ManageMPU6050Tasks(bool start)
+void ManageMPU6050Tasks(bool start)
 {
     char state[15] = { 0 };
     if (start)
@@ -241,5 +140,4 @@ static void ManageMPU6050Tasks(bool start)
             }
         }
     }
-
 }

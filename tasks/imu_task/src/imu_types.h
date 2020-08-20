@@ -26,4 +26,11 @@ typedef struct
     TickType_t xLastWakeTime;
 } imuTaskConfig_t;
 
+/**
+ * @brief Start or Stop MPU6050 Tasks
+ *
+ * @param start Start Tasks if True, otherwise Stop Tasks
+ */
+void ManageMPU6050Tasks(bool start);
+
 #endif /* IMU_TYPES_H_ */
