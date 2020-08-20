@@ -55,6 +55,10 @@ macro(OBJCOPY_FILE EXE_NAME)
     set_source_files_properties("${FO}" PROPERTIES GENERATED TRUE)
 endmacro(OBJCOPY_FILE)
 
+if(DEFINED LOG_LEVEL)
+    add_definitions(-D${LOG_LEVEL})
+endif()
+
 if(CMAKE_CROSSCOMPILING)
     # Include tivaware folder from Texas Instruments
     if ("${TIVAWARE_PATH}" STREQUAL "")

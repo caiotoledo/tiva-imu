@@ -31,8 +31,8 @@ jobs:
         # Download tivaware library
         - git clone https://github.com/caiotoledo/ti-tivaware.git ~/tiva-c/
         # Run cmake
-        - cmake -DCMAKE_TOOLCHAIN_FILE=$(realpath ./etc/toolchain_tivaware.cmake) -DTIVAWARE_PATH=$(realpath ~/tiva-c) .
-        - cmake -DCMAKE_TOOLCHAIN_FILE=$(realpath ./etc/toolchain_tivaware.cmake) -DTIVAWARE_PATH=$(realpath ~/tiva-c) .
+        - cmake -DLOG_LEVEL=LOG_DEBUG_INFO -DCMAKE_TOOLCHAIN_FILE=$(realpath ./etc/toolchain_tivaware.cmake) -DTIVAWARE_PATH=$(realpath ~/tiva-c) .
+        - cmake -DLOG_LEVEL=LOG_DEBUG_INFO -DCMAKE_TOOLCHAIN_FILE=$(realpath ./etc/toolchain_tivaware.cmake) -DTIVAWARE_PATH=$(realpath ~/tiva-c) .
         # build project
         - make
     - stage: Unittest

@@ -3,13 +3,6 @@
 
 #include <utils/uartstdio.h>
 
-/* Enable INFO logs */
-#define LOG_DEBUG_INFO
-/* Enable WARNING logs */
-// #define LOG_DEBUG_WARN
-/* Enable ERROR logs */
-// #define LOG_DEBUG_ERROR
-
 #define LOG_UART(...)           \
 do {                            \
     UARTprintf(__VA_ARGS__);    \
@@ -24,6 +17,7 @@ do {                                \
     UARTprintf("\r\n");             \
 } while(0)                          \
 
+/* MACRO for INFO logs */
 #ifdef LOG_DEBUG_INFO
     #define LOG_DEBUG_WARN
     #define INFO(...)       LOG_DEBUG_UART(INFO, __VA_ARGS__)
@@ -31,6 +25,7 @@ do {                                \
     #define INFO(...)
 #endif
 
+/* MACRO for WARNING logs */
 #ifdef LOG_DEBUG_WARN
     #define LOG_DEBUG_ERROR
     #define WARN(...)      LOG_DEBUG_UART(WARN, __VA_ARGS__)
@@ -38,6 +33,7 @@ do {                                \
     #define WARN(...)
 #endif
 
+/* MACRO for ERROR logs */
 #ifdef LOG_DEBUG_ERROR
     #define ERROR(...)      LOG_DEBUG_UART(ERROR, __VA_ARGS__)
 #else
