@@ -109,6 +109,12 @@ int UART_GetLine(char *str, size_t *size, bool echo)
             break;
         }
 
+        if (hasSpace && (c == '\b') && (index != 0U))
+        {
+            str[--index] = '\0';
+            continue; /* Skip the loop, don't store the backspace character */
+        }
+
         if (hasSpace)
         {
             /* Store new char and add a NULL terminator */
