@@ -14,87 +14,51 @@
 #define IMU_MIN_SAMPLE_RATE         (10)
 #define IMU_MAX_SAMPLE_RATE         (10000)
 
+/* Struct Foward declaration */
+typedef struct state_struct state_t;
+/* Function pointer type */
+typedef void (*imuFuncPtr)(state_t *);
+
+struct state_struct
+{
+    imuTaskConfig_t *config;
+    imuFuncPtr next;
+};
+
+/* State Machine Functions */
+static void MPU6050_Initialization(state_t *state);
+static void MPU6050_Run(state_t *state);
+
 static int MPU6050_SampleImuData(eMPU6050_BASE mpu, dataIMU_t *data);
 static void MPU6050_DataReady_Cb(eMPU6050_BASE mpu);
 
+/* Mutex to control concurrent access to the I2C peripheral */
+static SemaphoreHandle_t mtxI2C = NULL;
+/* Mutex notification when IMU Data is ready */
 static SemaphoreHandle_t xIMUDataReadySem[2] = { NULL };
+/* IMU sample rate in milliseconds */
 static uint32_t u32SampleRate = CONVERT_MS_TO_TICKS(IMU_INITIAL_SAMPLE_RATE);
 
 void vMPU6050Task(void *pvParameters)
 {
+    state_t stMPU6050Task = { 0 };
     imuTaskConfig_t *taskParam = (( imuTaskConfig_t * ) pvParameters);
 
-    /* Initialize the Mutex for this task only once */
-    static SemaphoreHandle_t mtxIMU = NULL;
-    if (mtxIMU == NULL)
+    /* Initialize I2C Mutex for this task only once */
+    if (mtxI2C == NULL)
     {
-        mtxIMU = xSemaphoreCreateMutex();
+        mtxI2C = xSemaphoreCreateMutex();
     }
 
-    /* Lock IMU mutex */
-    xSemaphoreTake(mtxIMU, portMAX_DELAY);
-    if (MPU6050_Enable(taskParam->mpu, taskParam->i2c, GetMillis) != 0)
+    /* Run State Machine */
+    stMPU6050Task.config = taskParam;
+    stMPU6050Task.next = MPU6050_Initialization; /* Initial State */
+    while (stMPU6050Task.next != NULL)
     {
-        ERROR("[%s] Enable Error!", taskParam->name);
-        /* Release IMU mutex */
-        xSemaphoreGive(mtxIMU);
-        goto end_mpu6050_task;
-    }
-    /* Release IMU mutex */
-    xSemaphoreGive(mtxIMU);
-
-    /* Initialize the Interrupt GPIO */
-    int retGpioInt = MPU6050_ConfigInterrupt(taskParam->mpu, taskParam->gpio_int, MPU6050_DataReady_Cb);
-    if (retGpioInt != 0)
-    {
-        ERROR("[%s] Interrupt Configuration Error!", taskParam->name);
-        goto end_mpu6050_task;
+        stMPU6050Task.next(&stMPU6050Task);
     }
 
-    /* Attempt to create a semaphore. */
-    if (xIMUDataReadySem[taskParam->mpu] == NULL)
-    {
-        xIMUDataReadySem[taskParam->mpu] = xSemaphoreCreateBinary();
-    }
-
-    /* Timer initialization */
-    taskParam->xLastWakeTime = xTaskGetTickCount();
-    for (;;)
-    {
-        /* Wait IMU Data to be ready */
-        if (xSemaphoreTake(xIMUDataReadySem[taskParam->mpu], (u32SampleRate/10)) != pdTRUE)
-        {
-            WARN("[%s] IMU Data not Ready!", taskParam->name);
-        }
-
-        /* Lock IMU mutex */
-        xSemaphoreTake(mtxIMU, portMAX_DELAY);
-
-        dataIMU_t dataimu = { 0 };
-        dataimu.imu = taskParam->name;
-        int ret = MPU6050_SampleImuData(taskParam->mpu, &dataimu);
-
-        /* Release IMU mutex */
-        xSemaphoreGive(mtxIMU);
-
-        /* Check if the data was successful sample */
-        if (ret == 0)
-        {
-            /* Send IMU data via queue */
-            if (xQueueSend(taskParam->queue, (void *)&dataimu, portMAX_DELAY) != pdTRUE)
-            {
-                ERROR("Full queue!");
-            }
-        }
-        else
-        {
-            ERROR("Error IMU Read!");
-        }
-
-        vTaskDelayUntil(&taskParam->xLastWakeTime, (TickType_t)u32SampleRate);
-    }
-
-end_mpu6050_task:
+    /* Delete task when State Machine finishes */
     taskParam->taskHandler = NULL;
     ERROR("Delete [%s] Task!", taskParam->name);
     vTaskDelete(NULL);
@@ -111,6 +75,85 @@ int MPU6050Task_SetSampleRate(uint32_t sample_rate)
     }
 
     return ret;
+}
+
+static void MPU6050_Initialization(state_t *state)
+{
+    /* Lock I2C mutex */
+    xSemaphoreTake(mtxI2C, portMAX_DELAY);
+
+    if (MPU6050_Enable(state->config->mpu, state->config->i2c, GetMillis) != 0)
+    {
+        ERROR("[%s] Enable Error!", state->config->name);
+        state->next = NULL;
+        goto end_mpu6050_initialization;
+    }
+
+    /* Initialize the Interrupt GPIO */
+    int retGpioInt = MPU6050_ConfigInterrupt(state->config->mpu, state->config->gpio_int, MPU6050_DataReady_Cb);
+    if (retGpioInt != 0)
+    {
+        ERROR("[%s] Interrupt Configuration Error!", state->config->name);
+        state->next = NULL;
+        goto end_mpu6050_initialization;
+    }
+
+    /* Attempt to create a semaphore. */
+    if (xIMUDataReadySem[state->config->mpu] == NULL)
+    {
+        xIMUDataReadySem[state->config->mpu] = xSemaphoreCreateBinary();
+    }
+
+end_mpu6050_initialization:
+    /* Release I2C mutex */
+    xSemaphoreGive(mtxI2C);
+
+    if (state->next != NULL)
+    {
+        /* Start IMU Sample */
+        state->next = MPU6050_Run;
+    }
+}
+
+static void MPU6050_Run(state_t *state)
+{
+    /* Timer initialization */
+    if (state->config->xLastWakeTime == 0U)
+    {
+        state->config->xLastWakeTime = xTaskGetTickCount();
+    }
+
+    /* Wait IMU Data to be ready */
+    if (xSemaphoreTake(xIMUDataReadySem[state->config->mpu], (u32SampleRate/10)) != pdTRUE)
+    {
+        WARN("[%s] IMU Data not Ready!", state->config->name);
+    }
+
+    /* Lock I2C mutex */
+    xSemaphoreTake(mtxI2C, portMAX_DELAY);
+
+    dataIMU_t dataimu = { 0 };
+    dataimu.imu = state->config->name;
+    int ret = MPU6050_SampleImuData(state->config->mpu, &dataimu);
+
+    /* Release I2C mutex */
+    xSemaphoreGive(mtxI2C);
+
+    /* Check if the data was successful sample */
+    if (ret == 0)
+    {
+        /* Send IMU data via queue */
+        if (xQueueSend(state->config->queue, (void *)&dataimu, portMAX_DELAY) != pdTRUE)
+        {
+            ERROR("Full queue!");
+        }
+    }
+    else
+    {
+        ERROR("Error IMU Read!");
+    }
+
+    vTaskDelayUntil(&state->config->xLastWakeTime, (TickType_t)u32SampleRate);
 }
 
 static int MPU6050_SampleImuData(eMPU6050_BASE mpu, dataIMU_t *data)
