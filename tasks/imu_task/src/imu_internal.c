@@ -22,8 +22,6 @@ static uint32_t u32SampleRate = CONVERT_MS_TO_TICKS(IMU_INITIAL_SAMPLE_RATE);
 
 void vMPU6050Task(void *pvParameters)
 {
-    int ret = 0;
-
     imuTaskConfig_t *taskParam = (( imuTaskConfig_t * ) pvParameters);
 
     /* Initialize the Mutex for this task only once */
@@ -74,7 +72,7 @@ void vMPU6050Task(void *pvParameters)
 
         dataIMU_t dataimu = { 0 };
         dataimu.imu = taskParam->name;
-        MPU6050_SampleImuData(taskParam->mpu, &dataimu);
+        int ret = MPU6050_SampleImuData(taskParam->mpu, &dataimu);
 
         /* Release IMU mutex */
         xSemaphoreGive(mtxIMU);
