@@ -2,6 +2,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include <utils.h>
 #include <log.h>
 #include <rgb.h>
 #include <button.h>
@@ -19,9 +20,6 @@
 #define RGB_RAINBOW_STEP_INCREMENT      (25U)
 
 #define RGB_TASK_DELAY                  (150/portTICK_RATE_MS)
-
-#define MIN(a,b)                        ((a > b) ? b : a)
-#define MAX(a,b)                        ((a > b) ? a : b)
 
 typedef enum {
     INCREMENT,
@@ -106,12 +104,7 @@ static BaseType_t RGBFreqCommand( char *pcWriteBuffer, size_t xWriteBufferLen, c
         &lParameterStringLength /* Store the parameter string length. */
     );
 
-    /* Convert String to Integer */
-    int value = 0;
-    for (size_t i = 0; (pcParameter[i] != '\0' && i < lParameterStringLength); i++)
-    {
-        value = value * 10 + pcParameter[i] - '0';
-    }
+    int value = UTILS_ConvertStringToNumber(pcParameter, lParameterStringLength);
 
     /* Update frequency value */
     if (SetRGBFreq(value) == 0U)

@@ -18,3 +18,6 @@ add_subdirectory(uart)
 
 # Add MCU library
 add_subdirectory(mcu)
+
+# Add Utils library
+add_subdirectory(utils)

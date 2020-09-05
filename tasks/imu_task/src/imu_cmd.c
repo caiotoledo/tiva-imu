@@ -1,5 +1,6 @@
 #include "imu_cmd.h"
 
+#include <utils.h>
 #include <cmd_task.h>
 #include <log.h>
 
@@ -9,14 +10,12 @@
 static BaseType_t IMURunCommand (char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString);
 static BaseType_t IMUSampleCommand (char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString);
 
-static uint32_t ConvertStringToNumber(const char *buf, size_t len);
-
 static const CLI_Command_Definition_t xIMURun =
 {
   "imu-run", /* The command string. */
   "imu-run [time]:\r\n Run the IMU sample for [time] seconds\r\n", /* Help string. */
   IMURunCommand, /* The function to run. */
-  1 /* No parameters are expected. */
+  1 /* One parameter is expected. */
 };
 
 static const CLI_Command_Definition_t xIMUSample =
@@ -24,7 +23,7 @@ static const CLI_Command_Definition_t xIMUSample =
   "imu-sample", /* The command string. */
   "imu-sample [period]:\r\n Configure IMU [period] sample rate in milliseconds\r\n", /* Help string. */
   IMUSampleCommand, /* The function to run. */
-  1 /* No parameters are expected. */
+  1 /* One parameter is expected. */
 };
 
 void vIMU_ConfigureCommands(void)
@@ -46,15 +45,21 @@ static BaseType_t IMURunCommand (char *pcWriteBuffer, size_t xWriteBufferLen, co
     &lTimeLength
   );
 
-  /* Convert String to Integer */
-  uint32_t time = ConvertStringToNumber(pcTime, lTimeLength);
+  int64_t time = UTILS_ConvertStringToNumber(pcTime, lTimeLength);
 
-  /* Start and Stop MPU6050 Task */
-  ManageMPU6050Tasks(false);
-  INFO("Resume MPU6050 tasks for [%u] seconds", time);
-  ManageMPU6050Tasks(true);
-  vTaskDelay((time*1000U)/portTICK_RATE_MS);
-  ManageMPU6050Tasks(false);
+  if (time >= 0)
+  {
+    /* Start and Stop MPU6050 Task */
+    ManageMPU6050Tasks(false);
+    INFO("Resume MPU6050 tasks for [%u] seconds", time);
+    ManageMPU6050Tasks(true);
+    vTaskDelay((time*1000U)/portTICK_RATE_MS);
+    ManageMPU6050Tasks(false);
+  }
+  else
+  {
+    ERROR("Invalid time [%d]", time);
+  }
 
   /* Do not use the pcWriteBuffer to output on console */
   if (xWriteBufferLen >= 1)
@@ -77,8 +82,8 @@ static BaseType_t IMUSampleCommand (char *pcWriteBuffer, size_t xWriteBufferLen,
     &lTimeLength
   );
 
-  /* Convert String to Integer */
-  uint32_t time = ConvertStringToNumber(pcTime, lTimeLength);
+  int64_t time = UTILS_ConvertStringToNumber(pcTime, lTimeLength);
+  time = MAX(0,time); /* Allow only positive time */
 
   /* Update sample rate */
   int ret = MPU6050Task_SetSampleRate(time);
@@ -100,19 +105,3 @@ static BaseType_t IMUSampleCommand (char *pcWriteBuffer, size_t xWriteBufferLen,
   return pdFALSE;
 }
 
-/**
- * @brief Convert a String to a Number
- *
- * @param buf String buffer with NULL Terminator
- * @param len String Length
- * @return uint32_t Return Number extracted
- */
-static uint32_t ConvertStringToNumber(const char *buf, size_t len)
-{
-  uint32_t val = 0;
-  for (size_t i = 0; (buf[i] != '\0' && i < len); i++)
-  {
-    val = val * 10 + buf[i] - '0';
-  }
-  return val;
-}
