@@ -14,6 +14,7 @@ set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O0")
 # Retrieve current commit hash
 execute_process (
     COMMAND git rev-parse --short HEAD
+    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
     RESULT_VARIABLE STATUS_CMD
     OUTPUT_VARIABLE COMMIT_HASH
 )
@@ -25,6 +26,7 @@ endif()
 
 execute_process (
     COMMAND bash -c "if ! $(git diff-index --quiet HEAD); then echo \"+\"; else echo \"\"; fi"
+    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
     RESULT_VARIABLE STATUS_CMD
     OUTPUT_VARIABLE LOCAL_DIRTY
 )
