@@ -89,6 +89,7 @@ if(CMAKE_CROSSCOMPILING)
     add_subdirectory(lib)
     # Link all local libraries
     target_link_libraries(${PROJECT_NAME}
+        utils
         rgb
         uart
         mcu

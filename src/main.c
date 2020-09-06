@@ -18,6 +18,7 @@
 #include <rgb.h>
 #include <hal_uart.h>
 #include <mcu.h>
+#include <utils.h>
 #include <log.h>
 
 #include <FreeRTOS.h>
@@ -32,8 +33,6 @@
 #include <imu_task.h>
 
 #define PROGRAM_NAME            "tiva-imu"
-
-#define UNUSED(x)               ((void)x)
 
 static BaseType_t VersionProgramCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString );
 static BaseType_t ResetMCUCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString );
@@ -72,6 +71,8 @@ static BaseType_t VersionProgramCommand( char *pcWriteBuffer, size_t xWriteBuffe
 static BaseType_t ResetMCUCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString )
 {
     UNUSED(pcCommandString);
+    UNUSED(pcWriteBuffer);
+    UNUSED(xWriteBufferLen);
 
     /* Delay for 100 ms - Wait devices to clear up their buffers */
     vTaskDelay(100/portTICK_RATE_MS);
