@@ -21,3 +21,6 @@ add_subdirectory(mcu)
 
 # Add Utils library
 add_subdirectory(utils)
+
+# Add Utils library
+add_subdirectory(imu_math)
