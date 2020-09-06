@@ -1,12 +1,12 @@
 #include <FreeRTOS.h>
 #include <queue.h>
 
+#include <utils.h>
 #include <log.h>
 
 #include "imu_types.h"
 #include "imu_logger.h"
 
-#define ABS(x)          (x < 0 ? (-x) : (x))
 #define FRAC_PRECISION  (4U)
 
 static inline void vDouble2IntFrac(double input, int *integer, uint32_t *fraction, uint8_t precision);
