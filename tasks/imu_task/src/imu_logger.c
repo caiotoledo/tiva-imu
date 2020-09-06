@@ -1,6 +1,8 @@
 #include <FreeRTOS.h>
 #include <queue.h>
 
+#include <imu_math.h>
+
 #include <utils.h>
 #include <log.h>
 
@@ -43,11 +45,37 @@ void vIMULogTask(void *pvParameters)
             vDouble2IntFrac(data.temperature, &integerTemp, &fracTemp, FRAC_PRECISION);
             INFO("[Temperature] [%d.%04u]", integerTemp, fracTemp);
 
-            LOG_UART("%s;%d;%d.%04u;%d.%04u;%d.%04u;%d.%04u;%d.%04u;%d.%04u;%d.%04u",
+            LOG_UART("RawData;%s;%d;%d.%04u;%d.%04u;%d.%04u;%d.%04u;%d.%04u;%d.%04u;%d.%04u",
                         data.imu, data.ms,
                         integerAccel[0], fracAccel[0], integerAccel[1], fracAccel[1], integerAccel[2], fracAccel[2],
                         integerGyro[0], fracGyro[0], integerGyro[1], fracGyro[1], integerGyro[2], fracGyro[2],
                         integerTemp, fracTemp);
+
+            int integerAngle[3];
+            uint32_t fracAngle[3];
+
+            int ret = 0;
+            double angleX, angleY, angleZ;
+            ret += CalculatePureAngle(&angleX, eAxisX, data.accel, eDegrees);
+            ret += CalculatePureAngle(&angleY, eAxisY, data.accel, eDegrees);
+            ret += CalculatePureAngle(&angleZ, eAxisZ, data.accel, eDegrees);
+
+            if (ret == 0)
+            {
+                vDouble2IntFrac(angleX, &integerAngle[0], &fracAngle[0], FRAC_PRECISION);
+                vDouble2IntFrac(angleY, &integerAngle[1], &fracAngle[1], FRAC_PRECISION);
+                vDouble2IntFrac(angleZ, &integerAngle[2], &fracAngle[2], FRAC_PRECISION);
+
+                INFO("[AngleX] %s;%d;%d.%04u", data.imu, data.ms, integerAngle[0], fracAngle[0]);
+                INFO("[AngleY] %s;%d;%d.%04u", data.imu, data.ms, integerAngle[1], fracAngle[1]);
+                INFO("[AngleZ] %s;%d;%d.%04u", data.imu, data.ms, integerAngle[2], fracAngle[2]);
+
+                LOG_UART("PureAngle;%s;%d;%d.%04u;%d.%04u;%d.%04u",
+                            data.imu, data.ms,
+                            integerAngle[0], fracAngle[0],
+                            integerAngle[1], fracAngle[1],
+                            integerAngle[2], fracAngle[2]);
+            }
         }
     }
 }

@@ -16,6 +16,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
   utils
   timer
   mpu6050
+  imu_math
   uart
   freertos
   cmd_task
