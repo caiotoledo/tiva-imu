@@ -19,4 +19,12 @@
  */
 int64_t UTILS_ConvertStringToNumber(const char *buf, size_t len);
 
+/**
+ * @brief Converts Twos Complement to Number
+ *
+ * @param value Twos Complement representation
+ * @return int16_t Number representantion
+ */
+int16_t UTILS_ConvertTwosComplementToNumber(uint16_t value);
+
 #endif /* UTILS_H_ */

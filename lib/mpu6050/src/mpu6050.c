@@ -12,6 +12,7 @@
 #include "driverlib/sysctl.h"
 #include "driverlib/pin_map.h"
 
+#include <utils.h>
 #include <log.h>
 #include <mpu6050.h>
 
@@ -460,17 +461,7 @@ end_mpu6050_setoffset:
 
 static double ConvertIMUVal(uint16_t val, double constant)
 {
-    double ret = 0;
-    if (!(val & 0x8000))
-    {
-        ret = ((double)val) / constant;
-    }
-    else
-    {
-        val = (((~val) + 1) & 0x7FFF);
-        ret = -(((double)val) / constant);
-    }
-    return ret;
+    return ((double)UTILS_ConvertTwosComplementToNumber(val)/constant);
 }
 
 static void ApplyAccelOffset(accel_t offset, accel_t *accel)

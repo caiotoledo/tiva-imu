@@ -16,3 +16,22 @@ int64_t UTILS_ConvertStringToNumber(const char *buf, size_t len)
 
   return (positive ? val : -val);
 }
+
+int16_t UTILS_ConvertTwosComplementToNumber(uint16_t value)
+{
+  int16_t ret = 0;
+  if (value == 0x8000)
+  {
+    ret = (int16_t)(0x8000);
+  }
+  else if (!((value & 0x8000) == 0x8000))
+  {
+    ret = value;
+  }
+  else
+  {
+    value = (((~value) + 1) & 0x7FFF);
+    ret = -value;
+  }
+  return ret;
+}

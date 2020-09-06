@@ -14,4 +14,4 @@ add_library(${PROJECT_NAME} STATIC ${src_files})
 target_include_directories(${PROJECT_NAME} INTERFACE ${PROJECT_SOURCE_DIR}/include)
 
 target_link_libraries(${PROJECT_NAME} PUBLIC i2c)
-target_link_libraries(${PROJECT_NAME} PRIVATE uart)
+target_link_libraries(${PROJECT_NAME} PRIVATE utils uart)
