@@ -459,6 +459,28 @@ end_mpu6050_setoffset:
     return;
 }
 
+void MPU6050_GetOffset(eMPU6050_BASE mpu, accel_t *accel, gyro_t *gyro)
+{
+    /* Get MPU configuration */
+    tMPU6050_Conf *mpu_conf;
+    GET_CONF(mpu_conf, mpu, end_mpu6050_getoffset);
+
+    /* Get accelerometer offset */
+    if (accel != NULL)
+    {
+        (*accel) = mpu_conf->conf.accelOffset;
+    }
+
+    /* Get gyroscope offset */
+    if (gyro != NULL)
+    {
+        (*gyro) = mpu_conf->conf.gyroOffset;
+    }
+
+end_mpu6050_getoffset:
+    return;
+}
+
 static double ConvertIMUVal(uint16_t val, double constant)
 {
     return ((double)UTILS_ConvertTwosComplementToNumber(val)/constant);

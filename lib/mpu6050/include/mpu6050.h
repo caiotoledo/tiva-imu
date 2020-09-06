@@ -95,4 +95,13 @@ int MPU6050_ReadTemperature(eMPU6050_BASE mpu, double *temperature);
  */
 void MPU6050_SetOffset(eMPU6050_BASE mpu, accel_t *accel, gyro_t *gyro);
 
+/**
+ * @brief Get offset for accelerometer and gyroscope
+ *
+ * @param mpu MPU Interface (see #eMPU6050_BASE)
+ * @param accel Pointer to hold accelerometer offsets
+ * @param gyro Pointer to hold gyroscope offsets
+ */
+void MPU6050_GetOffset(eMPU6050_BASE mpu, accel_t *accel, gyro_t *gyro);
+
 #endif /* MPU6050_H_ */
