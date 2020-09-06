@@ -109,11 +109,11 @@ static BaseType_t RGBFreqCommand( char *pcWriteBuffer, size_t xWriteBufferLen, c
     /* Update frequency value */
     if (SetRGBFreq(value) == 0U)
     {
-        LOG_UART("Update RGB Frequency value [%u]", value);
+        LOG_UART("Update RGB Frequency value [%d]", value);
     }
     else
     {
-        LOG_UART("Invalid value [%u] (MIN[%u] ~ MAX[%u])", value, RGB_RAINBOW_STEP_MIN, RGB_RAINBOW_STEP_MAX);
+        LOG_UART("Invalid value [%d] (MIN[%u] ~ MAX[%u])", value, RGB_RAINBOW_STEP_MIN, RGB_RAINBOW_STEP_MAX);
     }
 
     /* Do not use the pcWriteBuffer to output on console */

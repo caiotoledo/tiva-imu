@@ -51,14 +51,14 @@ static BaseType_t IMURunCommand (char *pcWriteBuffer, size_t xWriteBufferLen, co
   {
     /* Start and Stop MPU6050 Task */
     ManageMPU6050Tasks(false);
-    INFO("Resume MPU6050 tasks for [%u] seconds", time);
+    INFO("Resume MPU6050 tasks for [%d] seconds", (int)time);
     ManageMPU6050Tasks(true);
     vTaskDelay((time*1000U)/portTICK_RATE_MS);
     ManageMPU6050Tasks(false);
   }
   else
   {
-    ERROR("Invalid time [%d]", time);
+    ERROR("Invalid time [%d]", (int)time);
   }
 
   /* Do not use the pcWriteBuffer to output on console */
@@ -89,11 +89,11 @@ static BaseType_t IMUSampleCommand (char *pcWriteBuffer, size_t xWriteBufferLen,
   int ret = MPU6050Task_SetSampleRate(time);
   if (ret == 0)
   {
-    INFO("Update imu sample period [%u] ms", time);
+    INFO("Update imu sample period [%d] ms", (int)time);
   }
   else
   {
-    ERROR("INVALID imu sample period [%u] ms", time);
+    ERROR("INVALID imu sample period [%d] ms", (int)time);
   }
 
   /* Do not use the pcWriteBuffer to output on console */
