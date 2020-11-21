@@ -1,4 +1,5 @@
 from enum import Enum
+import re
 import time
 import argparse
 import serial
@@ -83,7 +84,7 @@ class Tiva:
   def __parseImuData(self, data):
     ret = {}
     for line in data.split('\n'):
-      if 'RawData' in line:
+      if re.search('^RawData',line) is not None:
         ImuName = line.split(';')[1]
         TimePoint = float(line.split(';')[2])
         AccelX = float(line.split(';')[3])
@@ -99,7 +100,7 @@ class Tiva:
         imu.addAccel(TimePoint, accel)
         imu.addGyro(TimePoint, gyro)
         ret[ImuName] = imu
-      if 'PureAngle' in line:
+      if re.search('^PureAngle',line) is not None:
         ImuName = line.split(';')[1]
         TimePoint = float(line.split(';')[2])
         AngleX = float(line.split(';')[3])
