@@ -117,12 +117,6 @@ end_mpu6050_initialization:
 
 static void MPU6050_Run(state_t *state)
 {
-    /* Timer initialization */
-    if (state->config->xLastWakeTime == 0U)
-    {
-        state->config->xLastWakeTime = xTaskGetTickCount();
-    }
-
     /* Wait IMU Data to be ready */
     if (xSemaphoreTake(xIMUDataReadySem[state->config->mpu], (u32SampleRate/10)) != pdTRUE)
     {
@@ -153,6 +147,11 @@ static void MPU6050_Run(state_t *state)
         ERROR("Error IMU Read!");
     }
 
+    /* Timer initialization */
+    if (state->config->xLastWakeTime == 0U)
+    {
+        state->config->xLastWakeTime = xTaskGetTickCount();
+    }
     vTaskDelayUntil(&state->config->xLastWakeTime, (TickType_t)u32SampleRate);
 }
 
