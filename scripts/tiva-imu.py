@@ -190,13 +190,21 @@ def main():
   coloredlogs.install(level=LoggerLevel,logger=Logger)
 
   tiva = Tiva(PortName=serialPort)
-  print('Reset Target')
+  Logger.info('Reset Target')
   tiva.runReset()
-  tiva.runRgbFreq(500)
-  print('Run Help')
+
+  rgbfreq = 500
+  Logger.info('Set RGB Frequency to {}'.format(rgbfreq))
+  tiva.runRgbFreq(rgbfreq)
+
+  Logger.info('Run Help')
   tiva.runHelp()
-  print("Running imu-run")
-  _, data = tiva.runImuSample(4)
+
+  imuSampleTimeout = 4
+  Logger.info('Running imu-run for {} seconds'.format(imuSampleTimeout))
+  _, data = tiva.runImuSample(imuSampleTimeout)
+
+  Logger.info('Disable RGB')
   tiva.runRgbFreq(0)
 
   for ImuName,imudata in data.items():
