@@ -121,6 +121,10 @@ class Tiva:
     ret, _ = self.__runCommand(cmd='reset\n', timeout=10)
     return ret
 
+  def runImuSampleRate(self, t):
+    ret, _ = self.__runCommand(cmd='imu-sample {}\n'.format(t))
+    return ret
+
   def runImuSample(self, t):
     ret, data = self.__runCommand(cmd='imu-run {}\n'.format(t), timeout=t)
     imudata = self.__parseImuData(data) if ret == Error_e.RET_OK else {}
@@ -199,6 +203,10 @@ def main():
 
   Logger.info('Run Help')
   tiva.runHelp()
+
+  samplerate = 500
+  Logger.info('Set Sample Rate to {} ms'.format(samplerate))
+  tiva.runImuSampleRate(samplerate)
 
   imuSampleTimeout = 4
   Logger.info('Running imu-run for {} seconds'.format(imuSampleTimeout))
