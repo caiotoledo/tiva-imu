@@ -24,6 +24,7 @@ typedef struct
     QueueHandle_t queue;
     TaskHandle_t taskHandler;
     TickType_t xLastWakeTime;
+    bool bRunSample;
 } imuTaskConfig_t;
 
 /**

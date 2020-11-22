@@ -30,6 +30,7 @@ static imuTaskConfig_t taskConfig[] =
         .queue = NULL,
         .taskHandler = NULL,
         .xLastWakeTime = 0U,
+        .bRunSample = false,
     },
     {
         .name = "MPU6050 High",
@@ -39,6 +40,7 @@ static imuTaskConfig_t taskConfig[] =
         .queue = NULL,
         .taskHandler = NULL,
         .xLastWakeTime = 0U,
+        .bRunSample = false,
     },
 };
 
@@ -107,30 +109,19 @@ void ManageMPU6050Tasks(bool start)
         if (taskConfig[i].taskHandler != NULL)
         {
             bool stChange = false; /* Just to be used to LOG if there was a state change */
-            eTaskState stTask = eTaskGetState(taskConfig[i].taskHandler);
             if (start)
             {
-                if (
-                    stTask != eRunning &&
-                    stTask != eReady &&
-                    stTask != eBlocked &&
-                    stTask != eDeleted
-                )
+                if (taskConfig[i].bRunSample == false)
                 {
-                    /* Update tick counter to avoid problems in delay */
-                    taskConfig[i].xLastWakeTime = xTaskGetTickCount();
-                    vTaskResume(taskConfig[i].taskHandler);
+                    taskConfig[i].bRunSample = true;
                     stChange = true;
                 }
             }
             else
             {
-                if (
-                    stTask != eSuspended &&
-                    stTask != eDeleted
-                )
+                if (taskConfig[i].bRunSample == true)
                 {
-                    vTaskSuspend(taskConfig[i].taskHandler);
+                    taskConfig[i].bRunSample = false;
                     stChange = true;
                 }
             }

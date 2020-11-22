@@ -27,6 +27,7 @@ struct state_struct
 
 /* State Machine Functions */
 static void MPU6050_Initialization(state_t *state);
+static void MPU6050_Wait(state_t *state);
 static void MPU6050_Run(state_t *state);
 
 static int MPU6050_SampleImuData(eMPU6050_BASE mpu, dataIMU_t *data);
@@ -111,6 +112,17 @@ end_mpu6050_initialization:
     if (state->next != NULL)
     {
         /* Start IMU Sample */
+        state->next = MPU6050_Wait;
+    }
+}
+
+static void MPU6050_Wait(state_t *state)
+{
+    state->config->xLastWakeTime = 0U;
+    vTaskDelay((TickType_t)u32SampleRate);
+
+    if (state->config->bRunSample == true)
+    {
         state->next = MPU6050_Run;
     }
 }
@@ -153,6 +165,12 @@ static void MPU6050_Run(state_t *state)
         state->config->xLastWakeTime = xTaskGetTickCount();
     }
     vTaskDelayUntil(&state->config->xLastWakeTime, (TickType_t)u32SampleRate);
+
+    /* Stop sampling if the flag was reset */
+    if (state->config->bRunSample == false)
+    {
+        state->next = MPU6050_Wait;
+    }
 }
 
 static int MPU6050_SampleImuData(eMPU6050_BASE mpu, dataIMU_t *data)
