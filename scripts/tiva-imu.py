@@ -8,7 +8,6 @@ import coloredlogs
 
 # Initialize Logger
 Logger = logging.getLogger('tiva-imu')
-coloredlogs.install(logger=Logger)
 
 # Version variable:
 __version__ = "v0.0.0"
@@ -187,8 +186,8 @@ def main():
   serialPort = args.Serial
   debug = args.Debug
 
-  if debug:
-    coloredlogs.install(level='DEBUG',logger=Logger)
+  LoggerLevel = 'DEBUG' if debug is True else 'INFO'
+  coloredlogs.install(level=LoggerLevel,logger=Logger)
 
   tiva = Tiva(PortName=serialPort)
   print('Reset Target')
