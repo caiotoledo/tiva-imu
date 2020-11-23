@@ -1,4 +1,5 @@
 from enum import Enum
+import datetime
 import re
 import time
 import argparse
@@ -45,9 +46,9 @@ class Tiva:
   __SerialTimeout = 1
   __EndCmd = '>>'
   def __init__(self, PortName):
-    self.__ser = serial.Serial(port=PortName, baudrate=115200, rtscts=True, timeout=self.__SerialTimeout)
+    self.__ser = serial.Serial(port=PortName, baudrate=115200, rtscts=True, timeout=0)
 
-  def __runCommand(self, cmd, timeout=__SerialTimeout):
+  def __runCommand(self, cmd, CallbackLine=None, timeout=__SerialTimeout):
     ret = Error_e.RET_OK
     # Hold private variables
     defaultTimeout = self.__SerialTimeout
@@ -55,14 +56,30 @@ class Tiva:
 
     # Flush serial receive buffer
     serialHandler.reset_input_buffer()
-    # Update timeout + 30% (considering serial buffering)
-    serialHandler.timeout = defaultTimeout if (timeout == defaultTimeout) else (timeout * 1.3)
 
+    # Send command via serial
     Logger.debug('Running Command [{}] with timeout [{}]'.format(cmd.replace('\n',''),timeout))
-    serialHandler.write(convertString2Bytes(cmd))
+    serialHandler.write(cmd.encode())
 
-    # Read until the end of command
-    data = serialHandler.read_until(self.__EndCmd.encode('utf-8')).decode('utf-8')
+    # Update timeout + 30% (considering serial buffering)
+    cmdTimeout = defaultTimeout if (timeout == defaultTimeout) else (timeout * 1.3)
+    dateTimeout = datetime.timedelta(seconds=cmdTimeout)
+
+    # Start Timer
+    begin = datetime.datetime.now()
+    data = '' # Initialize empty string
+    line = ''
+    while (datetime.datetime.now() - begin) < dateTimeout:
+      char = serialHandler.read_until().decode()
+      line = line + char
+      if ('\n' in line) or (self.__EndCmd in line):
+        data = data + line
+        # Notify new line
+        if (CallbackLine is not None) and (len(line) > 0): CallbackLine(line)
+        line = '' # reset string line
+        # Read until the end of command
+        if self.__EndCmd in data:
+          break
 
     if self.__EndCmd in data:
       ret = Error_e.RET_OK
@@ -76,40 +93,43 @@ class Tiva:
       time.sleep(waitRead if waitRead <= maxTimeout else maxTimeout)
       serialHandler.reset_input_buffer()
 
-    # Reset the previous timeout
-    serialHandler.timeout = defaultTimeout
     return ret, data
+
+  def __parseImuDataLine(self, line):
+    ImuName, TimePoint, AccelVal, GyroVal, AngleVal = None, None, None, None, None
+
+    if re.search('^RawData',line) is not None:
+      ImuName = line.split(';')[1]
+      TimePoint = float(line.split(';')[2])
+      AccelX = float(line.split(';')[3])
+      AccelY = float(line.split(';')[4])
+      AccelZ = float(line.split(';')[5])
+      GyroX = float(line.split(';')[6])
+      GyroY = float(line.split(';')[7])
+      GyroZ = float(line.split(';')[8])
+      AccelVal = Accel(AccelX, AccelY, AccelZ)
+      GyroVal = Gyro(GyroX, GyroY, GyroZ)
+    if re.search('^PureAngle',line) is not None:
+      ImuName = line.split(';')[1]
+      TimePoint = float(line.split(';')[2])
+      AngleX = float(line.split(';')[3])
+      AngleY = float(line.split(';')[4])
+      AngleZ = float(line.split(';')[5])
+      AngleVal = AngleEuler(AngleX, AngleY, AngleZ)
+
+    return ImuName, TimePoint, AccelVal, GyroVal, AngleVal
 
   def __parseImuData(self, data):
     ret = {}
     for line in data.split('\n'):
-      if re.search('^RawData',line) is not None:
-        ImuName = line.split(';')[1]
-        TimePoint = float(line.split(';')[2])
-        AccelX = float(line.split(';')[3])
-        AccelY = float(line.split(';')[4])
-        AccelZ = float(line.split(';')[5])
-        GyroX = float(line.split(';')[6])
-        GyroY = float(line.split(';')[7])
-        GyroZ = float(line.split(';')[8])
-        accel = Accel(AccelX, AccelY, AccelZ)
-        gyro = Gyro(GyroX, GyroY, GyroZ)
-
+      # Parse each line
+      ImuName, timepoint, accel, gyro, angle = self.__parseImuDataLine(line)
+      # Store data
+      if ImuName is not None and timepoint is not None:
         imu = ret[ImuName] if ImuName in ret else ImuData()
-        imu.addAccel(TimePoint, accel)
-        imu.addGyro(TimePoint, gyro)
-        ret[ImuName] = imu
-      if re.search('^PureAngle',line) is not None:
-        ImuName = line.split(';')[1]
-        TimePoint = float(line.split(';')[2])
-        AngleX = float(line.split(';')[3])
-        AngleY = float(line.split(';')[4])
-        AngleZ = float(line.split(';')[5])
-        angle = AngleEuler(AngleX, AngleY, AngleZ)
-
-        imu = ret[ImuName] if ImuName in ret else ImuData()
-        imu.addAngle(TimePoint, angle)
-        imu.addGyro(TimePoint, gyro)
+        if accel is not None: imu.addAccel(timepoint, accel)
+        if gyro is not None: imu.addGyro(timepoint, gyro)
+        if angle is not None: imu.addAngle(timepoint, angle)
         ret[ImuName] = imu
     return ret
 
@@ -125,8 +145,14 @@ class Tiva:
     ret, _ = self.__runCommand(cmd='imu-sample {}\n'.format(t))
     return ret
 
-  def runImuSample(self, t):
-    ret, data = self.__runCommand(cmd='imu-run {}\n'.format(t), timeout=t)
+  def runImuSample(self, t, Callback=None):
+    # Provide the data in realtime
+    def cb(line):
+      if Callback is not None:
+        name, timepoint, accel, gyro, angle = self.__parseImuDataLine(line)
+        if name is not None: Callback(name, timepoint, accel, gyro, angle)
+    # Execute command
+    ret, data = self.__runCommand(cmd='imu-run {}\n'.format(t), timeout=t, CallbackLine=cb)
     imudata = self.__parseImuData(data) if ret == Error_e.RET_OK else {}
     return ret, imudata
 
