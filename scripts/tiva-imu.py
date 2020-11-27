@@ -6,6 +6,8 @@ import argparse
 import serial
 import logging
 import coloredlogs
+import multiprocessing
+from concurrent.futures import ThreadPoolExecutor
 
 # Initialize Logger
 Logger = logging.getLogger('tiva-imu')
@@ -46,6 +48,9 @@ class Tiva:
   __SerialTimeout = 1
   __EndCmd = '>>'
   def __init__(self, PortName):
+    cpucount = multiprocessing.cpu_count()
+    Logger.debug('Max Workers: {}'.format(cpucount))
+    self.__executor = ThreadPoolExecutor(max_workers=cpucount)
     self.__ser = serial.Serial(port=PortName, baudrate=115200, rtscts=True, timeout=0)
 
   def __runCommand(self, cmd, CallbackLine=None, timeout=__SerialTimeout):
@@ -75,7 +80,7 @@ class Tiva:
       if ('\n' in line) or (self.__EndCmd in line):
         data = data + line
         # Notify new line
-        if (CallbackLine is not None) and (len(line) > 0): CallbackLine(line)
+        if (CallbackLine is not None) and (len(line) > 0): _ = self.__executor.submit(CallbackLine, line)
         line = '' # reset string line
         # Read until the end of command
         if self.__EndCmd in data:
