@@ -251,7 +251,7 @@ def main():
     for t,accel in imudata.ArrAccel.items():
       print('  {} -> Accel [{} ms] [{}]'.format(ImuName, t, accel))
     print('Gyroscope Data:')
-    for t,gyro in imudata.ArrAccel.items():
+    for t,gyro in imudata.ArrGyro.items():
       print('  {} -> Gyro [{} ms] [{}]'.format(ImuName, t, gyro))
     print('Euler Angle Data:')
     for t,angle in imudata.ArrAngle.items():
