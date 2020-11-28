@@ -131,7 +131,7 @@ class Tiva:
       ImuName, timepoint, accel, gyro, angle = self.__parseImuDataLine(line)
       # Store data
       if ImuName is not None and timepoint is not None:
-        imu = ret[ImuName] if ImuName in ret else ImuData()
+        imu = ret[ImuName] if ImuName in ret else ImuData(accel={}, gyro={}, angle={})
         if accel is not None: imu.addAccel(timepoint, accel)
         if gyro is not None: imu.addGyro(timepoint, gyro)
         if angle is not None: imu.addAngle(timepoint, angle)
@@ -193,7 +193,7 @@ class AngleEuler(Generic3DPoint):
 
 
 class ImuData:
-  def __init__(self, accel={}, gyro={}, angle={}):
+  def __init__(self, accel, gyro, angle):
     self.ArrAccel = accel
     self.ArrGyro = gyro
     self.ArrAngle = angle
