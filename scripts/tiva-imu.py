@@ -215,6 +215,8 @@ class ImuData:
 
 
 def main():
+  start_time = time.time()
+
   # Parse command line arguments
   args = parser.parse_args()
   # Store variables
@@ -256,6 +258,8 @@ def main():
     print('Euler Angle Data:')
     for t,angle in imudata.ArrAngle.items():
       print('  {} -> Angle [{} ms] [{}]'.format(ImuName, t, angle))
+
+  Logger.info("Execution time {:.2f} seconds".format(time.time() - start_time))
 
 
 if __name__ == "__main__":
