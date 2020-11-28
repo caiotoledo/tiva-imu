@@ -314,9 +314,14 @@ def main():
   Logger.info('Set Sample Rate to {} ms'.format(samplerate))
   tiva.runImuSampleRate(samplerate)
 
+  def disableRGB(_fut):
+    Logger.info('Disable RGB')
+    tiva.runRgbFreq(0)
+
   imuSampleTimeout = 4
   Logger.info('Running imu-run for {} seconds'.format(imuSampleTimeout))
   fut = executor.submit(tiva.runImuSample, t=imuSampleTimeout, Callback=CallbackImuData)
+  fut.add_done_callback(disableRGB)
   myplot = {}
   while (fut.running() is True) or (imuQueue.empty() is not True):
     try:
@@ -334,9 +339,6 @@ def main():
       # No data available, keep waiting until the future is done
       pass
   _, data = fut.result()
-
-  Logger.info('Disable RGB')
-  tiva.runRgbFreq(0)
 
   for ImuName,imudata in data.items():
     print('Accelerometer Data:')
