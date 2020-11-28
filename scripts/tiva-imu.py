@@ -8,6 +8,8 @@ import logging
 import coloredlogs
 import multiprocessing
 from concurrent.futures import ThreadPoolExecutor
+import queue
+import matplotlib.pyplot as plt
 
 # Initialize Logger
 Logger = logging.getLogger('tiva-imu')
@@ -214,6 +216,75 @@ class ImuData:
     return ImuData(accel, gyro, angle)
 
 
+class ImuDataPlot():
+  def __init__(self, imudata=ImuData(accel={}, gyro={}, angle={})):
+    self.Data = imudata
+    self.__fig, (self.__axAccel, self.__axGyro, self.__axAngle) = plt.subplots(3, 1)
+    self.__line = {}
+
+    self.__axAccel.set_title('Accelerometer')
+    self.__axAccel.set_ylim(2500,-2500) # Based on ACCEL_CONFIG Register (limits +-2g)
+    self.__axAccel.set(ylabel='Accel (mg)', xlabel='Time (ms)')
+
+    self.__axGyro.set_title('Gyroscope')
+    self.__axGyro.set_ylim(300,-300) # Based on GYRO_CONFIG Register (limits +-250°/s)
+    self.__axGyro.set(ylabel='Gyro (°/s)', xlabel='Time (ms)')
+
+    self.__axAngle.set_title('Euler Angle')
+    self.__axAngle.set_ylim(400,-400)
+    self.__axAngle.set(ylabel='Angle (°)', xlabel='Time (ms)')
+
+  def setImuData(self, imudata):
+    self.Data = imudata
+
+  def appendImuData(self, imudata):
+    self.Data = self.Data + imudata
+
+  def __getArrDataPlot(self):
+    def __parseData(Arr3DPointIn):
+      dictOut = {'T':[], 'X':[], 'Y':[], 'Z':[]}
+      for key,value in Arr3DPointIn.items():
+        dictOut['T'].append(key)
+        dictOut['X'].append(value.X)
+        dictOut['Y'].append(value.Y)
+        dictOut['Z'].append(value.Z)
+      return dictOut
+
+    imuAccel = __parseData(self.Data.ArrAccel)
+    imuGyro =  __parseData(self.Data.ArrGyro)
+    imuAngle = __parseData(self.Data.ArrAngle)
+
+    return imuAccel, imuGyro, imuAngle
+
+  def __plotGraph(self, ax, plotData):
+    ax.plot(plotData['T'], plotData['X'], 'r.')
+    ax.plot(plotData['T'], plotData['Y'], 'g.')
+    ax.plot(plotData['T'], plotData['Z'], 'b.')
+    ax.grid(b=True)
+
+  def showGraph(self, title='', pause_time=0.001):
+    self.__fig.suptitle(title)
+    plotAccel, plotGyro, plotAngle = self.__getArrDataPlot()
+
+    self.__plotGraph(self.__axAccel, plotAccel)
+    self.__plotGraph(self.__axGyro, plotGyro)
+    self.__plotGraph(self.__axAngle, plotAngle)
+
+    plt.draw()
+    plt.pause(pause_time)
+
+
+imuQueue = queue.Queue()
+def CallbackImuData(name, timepoint, accel, gyro, angle):
+  Logger.debug('[{}][{}] / {} / {} / {}'.format(name, timepoint, accel, gyro, angle))
+
+  imu = ImuData(accel={}, gyro={}, angle={})
+  if accel is not None: imu.addAccel(timepoint, accel)
+  if gyro is not None: imu.addGyro(timepoint, gyro)
+  if angle is not None: imu.addAngle(timepoint, angle)
+  imuQueue.put((name, imu))
+
+
 def main():
   start_time = time.time()
 
@@ -225,6 +296,8 @@ def main():
 
   LoggerLevel = 'DEBUG' if debug is True else 'INFO'
   coloredlogs.install(level=LoggerLevel,logger=Logger)
+
+  executor = ThreadPoolExecutor(max_workers=multiprocessing.cpu_count())
 
   tiva = Tiva(PortName=serialPort)
   Logger.info('Reset Target')
@@ -243,7 +316,24 @@ def main():
 
   imuSampleTimeout = 4
   Logger.info('Running imu-run for {} seconds'.format(imuSampleTimeout))
-  _, data = tiva.runImuSample(imuSampleTimeout)
+  fut = executor.submit(tiva.runImuSample, t=imuSampleTimeout, Callback=CallbackImuData)
+  myplot = {}
+  while (fut.running() is True) or (imuQueue.empty() is not True):
+    try:
+      # Get data from queue
+      name, item = imuQueue.get(timeout=samplerate/1000)
+      # Instanciate new object or get from dict the plot
+      plot = myplot[name] if name in myplot else ImuDataPlot()
+      # Append data
+      plot.appendImuData(item)
+      titleGraph = 'IMU Data [{}]'.format(name)
+      plot.showGraph(titleGraph, pause_time=samplerate/1000)
+      # Feedback to dict
+      myplot[name] = plot
+    except queue.Empty:
+      # No data available, keep waiting until the future is done
+      pass
+  _, data = fut.result()
 
   Logger.info('Disable RGB')
   tiva.runRgbFreq(0)
