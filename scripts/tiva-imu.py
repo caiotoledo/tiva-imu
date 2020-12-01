@@ -19,11 +19,23 @@ __version__ = "v0.0.0"
 
 # Arguments parser:
 parser = argparse.ArgumentParser(description='Script to interact with tiva-imu')
-parser.add_argument("--Serial",
+parser.add_argument("--SerialPort",
                     "-s",
-                    dest="Serial",
+                    dest="SerialPort",
                     help="Serial Port connected to tiva-imu",
                     metavar="PORT",
+                    required=True)
+parser.add_argument("--SampleRate",
+                    "-r",
+                    dest="SampleRate",
+                    help="IMU Sample rate in ms",
+                    metavar="SAMPLERATE",
+                    required=True)
+parser.add_argument("--SampleTime",
+                    "-t",
+                    dest="SampleTime",
+                    help="IMU Sample time in seconds",
+                    metavar="SAMPLETIME",
                     required=True)
 parser.add_argument('--Debug',
                     '-d',
@@ -297,7 +309,9 @@ def main():
   # Parse command line arguments
   args = parser.parse_args()
   # Store variables
-  serialPort = args.Serial
+  serialPort = args.SerialPort
+  sampleRate = int(args.SampleRate)
+  sampleTime = int(args.SampleTime)
   debug = args.Debug
 
   LoggerLevel = 'DEBUG' if debug is True else 'INFO'
@@ -316,7 +330,7 @@ def main():
   Logger.info('Run Help')
   tiva.runHelp()
 
-  samplerate = 500
+  samplerate = sampleRate
   Logger.info('Set Sample Rate to {} ms'.format(samplerate))
   tiva.runImuSampleRate(samplerate)
 
@@ -324,7 +338,7 @@ def main():
     Logger.info('Disable RGB')
     tiva.runRgbFreq(0)
 
-  imuSampleTimeout = 4
+  imuSampleTimeout = sampleTime
   Logger.info('Running imu-run for {} seconds'.format(imuSampleTimeout))
   fut = executor.submit(tiva.runImuSample, t=imuSampleTimeout, Callback=CallbackImuData)
   fut.add_done_callback(disableRGB)
