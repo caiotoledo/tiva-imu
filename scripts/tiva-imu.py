@@ -365,17 +365,17 @@ def main():
 
   _, data = fut.result()
 
-  print('Show Raw Data:')
+  Logger.debug('IMU Raw Data:')
   for ImuName,imudata in data.items():
-    print('Accelerometer Data:')
+    Logger.debug('Accelerometer Data:')
     for t,accel in imudata.ArrAccel.items():
-      print('  {} -> Accel [{} ms] [{}]'.format(ImuName, t, accel))
-    print('Gyroscope Data:')
+      Logger.debug('  {} -> Accel [{} ms] [{}]'.format(ImuName, t, accel))
+    Logger.debug('Gyroscope Data:')
     for t,gyro in imudata.ArrGyro.items():
-      print('  {} -> Gyro [{} ms] [{}]'.format(ImuName, t, gyro))
-    print('Euler Angle Data:')
+      Logger.debug('  {} -> Gyro [{} ms] [{}]'.format(ImuName, t, gyro))
+    Logger.debug('Euler Angle Data:')
     for t,angle in imudata.ArrAngle.items():
-      print('  {} -> Angle [{} ms] [{}]'.format(ImuName, t, angle))
+      Logger.debug('  {} -> Angle [{} ms] [{}]'.format(ImuName, t, angle))
 
   Logger.info("Execution time {:.2f} seconds".format(time.time() - start_time))
 
