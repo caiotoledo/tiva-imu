@@ -105,24 +105,28 @@ class Tiva:
   def __parseImuDataLine(self, line):
     ImuName, TimePoint, AccelVal, GyroVal, AngleVal = None, None, None, None, None
 
-    if re.search('^RawData',line) is not None:
-      ImuName = line.split(';')[1]
-      TimePoint = float(line.split(';')[2])
-      AccelX = float(line.split(';')[3])
-      AccelY = float(line.split(';')[4])
-      AccelZ = float(line.split(';')[5])
-      GyroX = float(line.split(';')[6])
-      GyroY = float(line.split(';')[7])
-      GyroZ = float(line.split(';')[8])
-      AccelVal = Accel(AccelX, AccelY, AccelZ)
-      GyroVal = Gyro(GyroX, GyroY, GyroZ)
-    if re.search('^PureAngle',line) is not None:
-      ImuName = line.split(';')[1]
-      TimePoint = float(line.split(';')[2])
-      AngleX = float(line.split(';')[3])
-      AngleY = float(line.split(';')[4])
-      AngleZ = float(line.split(';')[5])
-      AngleVal = AngleEuler(AngleX, AngleY, AngleZ)
+    try:
+      if re.search('^RawData',line) is not None:
+        ImuName = line.split(';')[1]
+        TimePoint = float(line.split(';')[2])
+        AccelX = float(line.split(';')[3])
+        AccelY = float(line.split(';')[4])
+        AccelZ = float(line.split(';')[5])
+        GyroX = float(line.split(';')[6])
+        GyroY = float(line.split(';')[7])
+        GyroZ = float(line.split(';')[8])
+        AccelVal = Accel(AccelX, AccelY, AccelZ)
+        GyroVal = Gyro(GyroX, GyroY, GyroZ)
+      if re.search('^PureAngle',line) is not None:
+        ImuName = line.split(';')[1]
+        TimePoint = float(line.split(';')[2])
+        AngleX = float(line.split(';')[3])
+        AngleY = float(line.split(';')[4])
+        AngleZ = float(line.split(';')[5])
+        AngleVal = AngleEuler(AngleX, AngleY, AngleZ)
+    except:
+      Logger.error('Invalid line [{}]'.format(line))
+      pass
 
     return ImuName, TimePoint, AccelVal, GyroVal, AngleVal
 
