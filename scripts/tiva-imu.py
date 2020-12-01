@@ -260,6 +260,7 @@ class ImuDataPlot():
     ax.plot(plotData['T'], plotData['X'], 'r.')
     ax.plot(plotData['T'], plotData['Y'], 'g.')
     ax.plot(plotData['T'], plotData['Z'], 'b.')
+    ax.legend(['X','Y','Z'])
     ax.grid(b=True)
 
   def showGraph(self, title='', pause_time=0.001):
