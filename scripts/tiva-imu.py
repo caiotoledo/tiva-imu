@@ -365,6 +365,7 @@ def main():
 
   _, data = fut.result()
 
+  print('Show Raw Data:')
   for ImuName,imudata in data.items():
     print('Accelerometer Data:')
     for t,accel in imudata.ArrAccel.items():
@@ -377,6 +378,8 @@ def main():
       print('  {} -> Angle [{} ms] [{}]'.format(ImuName, t, angle))
 
   Logger.info("Execution time {:.2f} seconds".format(time.time() - start_time))
+
+  plt.show()
 
 
 if __name__ == "__main__":
