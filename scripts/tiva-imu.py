@@ -37,10 +37,6 @@ parser.add_argument('--version',
                     version=__version__)
 
 
-def convertString2Bytes(str):
-  return bytes(str,'utf-8')
-
-
 class Error_e(Enum):
   RET_OK = 0
   RET_ERROR = 1
