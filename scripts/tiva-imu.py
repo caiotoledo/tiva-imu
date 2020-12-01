@@ -275,6 +275,11 @@ class ImuDataPlot():
     plt.pause(pause_time)
 
 
+def updateIMUPlot(nameIMU, plot, pause_time=0.001):
+  titleGraph = 'IMU Data [{}]'.format(nameIMU)
+  plot.showGraph(titleGraph, pause_time=pause_time)
+
+
 imuQueue = queue.Queue()
 def CallbackImuData(name, timepoint, accel, gyro, angle):
   Logger.debug('[{}][{}] / {} / {} / {}'.format(name, timepoint, accel, gyro, angle))
@@ -332,13 +337,18 @@ def main():
       plot = myplot[name] if name in myplot else ImuDataPlot()
       # Append data
       plot.appendImuData(item)
-      titleGraph = 'IMU Data [{}]'.format(name)
-      plot.showGraph(titleGraph, pause_time=samplerate/1000)
+      # Update Plot only when there's no data available in the queue
+      if imuQueue.empty():
+        updateIMUPlot(nameIMU=name, plot=plot, pause_time=samplerate/1000)
       # Feedback to dict
       myplot[name] = plot
     except queue.Empty:
       # No data available, keep waiting until the future is done
       pass
+  # Last plot to avoid data loss
+  for name,plot in myplot.items():
+    updateIMUPlot(nameIMU=name, plot=plot)
+
   _, data = fut.result()
 
   for ImuName,imudata in data.items():
