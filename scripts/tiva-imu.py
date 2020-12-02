@@ -269,9 +269,12 @@ class ImuDataPlot():
     return imuAccel, imuGyro, imuAngle
 
   def __plotGraph(self, ax, plotData):
-    ax.plot(plotData['T'], plotData['X'], 'r.')
-    ax.plot(plotData['T'], plotData['Y'], 'g.')
-    ax.plot(plotData['T'], plotData['Z'], 'b.')
+    # Normalize time data (Always start from 0 seconds)
+    timeDataArr = [timeData - plotData['T'][0] for timeData in plotData['T']]
+    # Plot IMU data
+    ax.plot(timeDataArr, plotData['X'], 'r.')
+    ax.plot(timeDataArr, plotData['Y'], 'g.')
+    ax.plot(timeDataArr, plotData['Z'], 'b.')
     ax.legend(['X','Y','Z'])
     ax.grid(b=True)
 
